@@ -4,7 +4,7 @@ s_sensorIdx = 9;
 //fountail
 s_sceneName = "fountain";
 //s_binaryDumpSensorFile[0] = "data/fountain_all";
-s_binaryDumpSensorFile[0] = "C:\Users\14109\Downloads\fountain_all\fountain_all";
+s_binaryDumpSensorFile[0] = "C:\Users\max\Downloads\fountain_all";
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // parameters for our implementation
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -39,9 +39,9 @@ s_startFrame = 0;
 s_texPoolPatchWidth = 4;
 
 // The number of preallocated tiles in GPU
-s_texPoolNumPatches =2000000;
+s_texPoolNumPatches = 100;//2000000;
 //8000000
-s_numTextureTileWidth = 1024;
+s_numTextureTileWidth = 128; //1024;
 
 // About blending weights
 s_texIntegrationWeightMax = 255;
@@ -98,8 +98,8 @@ s_SDFIntegrationWeightMax = 255;		//maximum integration weight for a voxel
 
 // s_SDFBlockSize is pound defined (SDF_BLOCK_SIZE)
 // s_hashBucketSize is pound defined (HASH_BUCKET_SIZE)
-s_hashNumBuckets = 50000;				//smaller voxels require more space
-s_hashNumSDFBlocks = 50000;			//smaller voxels require more space
+s_hashNumBuckets = 100;//50000;				//smaller voxels require more space
+s_hashNumSDFBlocks = 100;//50000;			//smaller voxels require more space
 s_hashMaxCollisionLinkedListSize = 5;
 
 // raycast
@@ -148,7 +148,7 @@ s_remappingDepthDiscontinuityThresOffset = 0.012f;	// discontinuity offset in me
 s_remappingDepthDiscontinuityThresLin	 = 0.016f;	// additional discontinuity threshold per meter
 
 s_bUseCameraCalibration = false;
-s_marchingCubesMaxNumTriangles = 2500000; // max buffer size for marching cube
+s_marchingCubesMaxNumTriangles = 500;//2500000; // max buffer size for marching cube
 
 //streaming parameters
 s_streamingEnabled = false;
