@@ -79,7 +79,10 @@ void CUDASceneRepChunkGrid::streamOutToCPUPass0GPU(const vec3f& posCamera, float
 	integrateFromGlobalHashPass1CUDA(m_sceneRepHashSDF->getHashParams(), m_sceneRepHashSDF->getHashData(), threadsPerPart, start, radius, MatrixConversion::toCUDA(posCamera), d_SDFBlockCounter, d_SDFBlockDescOutput);
 
 	const unsigned int nSDFBlockDescs = getSDFBlockCounter();
-	if (nSDFBlockDescs >= m_maxNumberOfSDFBlocksIntegrateFromGlobalHash) throw MLIB_EXCEPTION("not enough memory allocated for intermediate GPU buffer (wants to stream out more block than m_maxNumberOfSDFBlocksIntegrateFromGlobalHash)");
+	if (nSDFBlockDescs >= m_maxNumberOfSDFBlocksIntegrateFromGlobalHash) { 
+		std::cout << "nSDFBlockDescs: " << nSDFBlockDescs << ", m_maxNumberOfSDFBlocksIntegrateFromGlobalHash: " << m_maxNumberOfSDFBlocksIntegrateFromGlobalHash << std::endl;
+		throw MLIB_EXCEPTION("not enough memory allocated for intermediate GPU buffer (wants to stream out more block than m_maxNumberOfSDFBlocksIntegrateFromGlobalHash)"); 
+	}
 
 	if (useParts) m_currentPart = (m_currentPart+1) % m_streamOutParts;
 
