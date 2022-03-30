@@ -4,7 +4,7 @@ s_sensorIdx = 9;
 //fountail
 s_sceneName = "fountain";
 //s_binaryDumpSensorFile[0] = "data/fountain_all";
-s_binaryDumpSensorFile[0] = "C:\Users\max\Downloads\fountain_all";
+s_binaryDumpSensorFile[0] = "C:\Users\max\Downloads\realsense_depth_color\further_away";
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // parameters for our implementation
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -22,7 +22,7 @@ s_autoExposureEnabled = false;
 s_autoWhiteBalanceEnabled = false;
 
 s_renderToFile = false;	//for making paper videos: renders all input/raycasts etc. to images
-s_renderToFileDir = "C:\Users\max\Downloads\fountain_all\test\";
+s_renderToFileDir = "C:\Users\max\Downloads\realsense_depth_color\test\";
 
 // Enable voxel rendering or not
 s_voxelRenderingEnabled  = false;
@@ -31,15 +31,15 @@ s_voxelRenderingEnabled  = false;
 s_texKeyFrames = 2;
 
 // used when we use record files
-s_nVideoFrame = 700;
+s_nVideoFrame =2000;
 //s_nVideoFrame = 0;
 s_startFrame = 0;
 
 // Texture width
-s_texPoolPatchWidth = 8;
+s_texPoolPatchWidth = 4;
 
 // The number of preallocated tiles in GPU
-s_texPoolNumPatches = 500000; //8000000;
+s_texPoolNumPatches = 8000000;
 s_numTextureTileWidth = 1024;
 
 // About blending weights
@@ -66,8 +66,8 @@ s_sigmaArea = 1.0;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Screen parameters
-s_windowWidth = 1920;		//render window width
-s_windowHeight = 1440;		//render window height
+s_windowWidth = 2048;		//render window width
+s_windowHeight = 1536;		//render window height
 s_adapterWidth = 640;		//input depth gets re-sampled to this width
 s_adapterHeight = 480;		//input depth gets re-sampled to this height
 
@@ -80,12 +80,6 @@ s_colorCropX = 320;
 s_colorCropY = 272;
 s_colorCropWidth = 640;
 s_colorCropHeight = 480;
-
-// sdf and hash settings
-//s_SDFVoxelSize = 0.01;				//voxel size in meter
-//s_SDFMarchingCubeThreshFactor = 10.0f;	//marching cube thresh: s_SDFMarchingCubeThresh = s_SDFMarchingCubeThreshFactor*s_SDFVoxelSize
-//s_SDFTruncation = 0.05f;				//truncation in meter (5.0f*s_SDFVoxelSize )
-//s_SDFTruncationScale = 0.025f;			//truncation scale in meter per meter (2.5f*s_SDFVoxelSize )
 
 s_SDFVoxelSize = 0.01;				//voxel size in meter
 s_SDFMarchingCubeThreshFactor = 10.0f;	//marching cube thresh: s_SDFMarchingCubeThresh = s_SDFMarchingCubeThreshFactor*s_SDFVoxelSize

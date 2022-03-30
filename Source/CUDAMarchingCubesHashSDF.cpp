@@ -126,7 +126,7 @@ void CUDAMarchingCubesHashSDF::copyTrianglesToCPU(TexPoolData texPoolData, TexPo
 
 			md.m_Vertices.resize(3 * nTriangles);
 			md.m_Colors.resize(3 * nTriangles);
-			
+			 
 			// For the texture
 			md.m_TextureCoords.resize(3 * nTriangles);
 			textureIndex.resize(3 * nTriangles);
@@ -291,6 +291,7 @@ void CUDAMarchingCubesHashSDF::saveMesh(const std::string& filename, const mat4f
 
 	//std::string actualFilename = filename;
 	std::string actualFilename = "Scans/" + GlobalAppState::get().s_sceneName + GlobalAppState::get().export_surfix[GlobalAppState::get().s_optimizationIdx] + ".obj";
+	std::string actualFilenameOFF = "Scans/" + GlobalAppState::get().s_sceneName + GlobalAppState::get().export_surfix[GlobalAppState::get().s_optimizationIdx] + ".off";
 	std::string actualFilenamePLY = "Scans/" + GlobalAppState::get().s_sceneName + GlobalAppState::get().export_surfix[GlobalAppState::get().s_optimizationIdx] + ".ply";
 	if (!overwriteExistingFile) {
 		while (util::fileExists(actualFilename)) {
@@ -305,6 +306,8 @@ void CUDAMarchingCubesHashSDF::saveMesh(const std::string& filename, const mat4f
 			}
 			actualFilename = path + base + std::to_string(num + 1) + "." + ext;
 			actualFilenamePLY = path + base + std::to_string(num + 1) + ".ply";
+			actualFilenameOFF = path + base + std::to_string(num + 1) + ".off";
+
 		}
 	}
 
@@ -340,8 +343,12 @@ void CUDAMarchingCubesHashSDF::saveMesh(const std::string& filename, const mat4f
 	std::string mtlfilename = GlobalAppState::get().export_mtlfilename.back();
 	GlobalAppState::get().export_mtlfilename.pop_back();
 
+	std::cout << "saving mesh (" << actualFilenameOFF << ") ...";
+	MeshIOf::saveToFile(actualFilenameOFF, m_meshData);
+	std::cout << "done!" << std::endl;
+
 	std::cout << "saving mesh (" << actualFilename << ") ...";
-	//MeshIOf::saveToFile(actualFilename, m_meshData, mtlfilename);
+	MeshIOf::saveToFile(actualFilename, m_meshData);
 	std::cout << "done!" << std::endl;
 
 	m_meshOnlyData.removeDuplicateVertices();
