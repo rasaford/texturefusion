@@ -286,7 +286,8 @@ void StopScanningAndExtractIsoSurfaceMC(const std::string& filename, bool overwr
 		//g_chunkGrid->stopMultiThreading();
 		//g_chunkGrid->streamInToGPUAll();
 		std::cout << "Marching Cube 1" << std::endl;
-		g_marchingCubesHashSDF->extractIsoSurface(g_sceneRep->getHashData(), g_sceneRep->getHashParams(), g_rayCast->getRayCastData(), g_texUpdate->getTexPoolData(), g_texUpdate->getTexPoolParams());
+		throw std::invalid_argument("Streaming has to be enabled to write textures. TODO: fix this in the future");
+		//g_marchingCubesHashSDF->extractIsoSurface(g_sceneRep->getHashData(), g_sceneRep->getHashParams(), g_rayCast->getRayCastData(), g_texUpdate->getTexPoolData(), g_texUpdate->getTexPoolParams());
 		//g_chunkGrid->startMultiThreading();
 
 	}

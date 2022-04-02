@@ -637,8 +637,8 @@ void MeshIO<FloatType>::saveToOBJ( const std::string& filename, const MeshData<F
 				if (mesh.m_FaceIndicesTextureCoords.size() > 0) {
 					file << mesh.m_FaceIndicesTextureCoords[i][j]+1;
 				}
-				// file << "//";
 				if (mesh.m_FaceIndicesNormals.size() > 0) {
+					file << "//";
 					file << mesh.m_FaceIndicesNormals[i][j]+1;
 				}
 			}

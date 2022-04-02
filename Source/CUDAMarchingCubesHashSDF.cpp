@@ -36,7 +36,7 @@ void CUDAMarchingCubesHashSDF::destroy(void)
 	m_data.free();
 }
 
-void CUDAMarchingCubesHashSDF::copyTrianglesToCPU(TexPoolData texPoolData, TexPoolParams texPoolParams) {
+void CUDAMarchingCubesHashSDF::copyTrianglesToCPU(TexPoolData texPoolData, TexPoolParams texPoolParams, const uint texTileWidthStart, const uint texTileHeightStart) {
 
 	//could  be a bit more efficient here; rather than allocating so much memory; just allocate depending on the triangle size;
 	MarchingCubesData cpuData = m_data.copyToCPU();
@@ -87,6 +87,9 @@ void CUDAMarchingCubesHashSDF::copyTrianglesToCPU(TexPoolData texPoolData, TexPo
 				uniqueTextureIndexInverse[uniqueTextureIndex[i]] = i;
 
 			//assign texture coordinates to each vertex.
+			vec2f chunk2globalTexOrigin = vec2f((float)texTileWidthStart / (float) globalTexMapWidth, 
+												(float)texTileHeightStart / (float)globalTexMapWidth);
+
 			for (unsigned int i = 0; i < 3 * nTriangles; i++) {
 				unsigned int index = 0;
 				index = uniqueTextureIndexInverse[textureIndex[i]];
@@ -96,7 +99,9 @@ void CUDAMarchingCubesHashSDF::copyTrianglesToCPU(TexPoolData texPoolData, TexPo
 
 				unsigned int patch_y = unsigned int(index / textureTileWidth);
 				unsigned int patch_x = unsigned int(index % textureTileWidth);
-				m_meshData.m_TextureCoords[i] = (m_meshData.m_TextureCoords[i] + vec2f(patch_x, patch_y) * (texPoolParams.m_texturePatchWidth + 2)) / textureTileWidth / (texPoolParams.m_texturePatchWidth + 2);
+				// map texture coords from tile scale to global tex map
+				vec2f chunkTexCoords = (m_meshData.m_TextureCoords[i] + vec2f(patch_x, patch_y) * (texPoolParams.m_texturePatchWidth + 2)) / textureTileWidth / (texPoolParams.m_texturePatchWidth + 2);
+				m_meshData.m_TextureCoords[i] = chunk2globalTexOrigin + chunkTexCoords / numGlobalTexTilesWidth;
 			}
 			printf("Texcoord indexing finish\n");
 
@@ -166,6 +171,9 @@ void CUDAMarchingCubesHashSDF::copyTrianglesToCPU(TexPoolData texPoolData, TexPo
 				uniqueTextureIndexInverse[uniqueTextureIndex[i]] = i;
 
 			//assign texture coordinates to each vertex.
+			vec2f chunk2globalTexOrigin = vec2f((float)texTileWidthStart / (float) globalTexMapWidth, 
+												(float)texTileHeightStart / (float)globalTexMapWidth);
+			//assign texture coordinates to each vertex.
 			for (unsigned int i = 0; i < 3 * nTriangles; i++) {
 				unsigned int index = 0;
 				index = uniqueTextureIndexInverse[textureIndex[i]];
@@ -175,7 +183,12 @@ void CUDAMarchingCubesHashSDF::copyTrianglesToCPU(TexPoolData texPoolData, TexPo
 
 				unsigned int patch_y = unsigned int(index / textureTileWidth);
 				unsigned int patch_x = unsigned int(index % textureTileWidth);
-				md.m_TextureCoords[i] = (md.m_TextureCoords[i] + vec2f(patch_x, patch_y) * (float)(texPoolParams.m_texturePatchWidth + 2)) / (float)textureTileWidth / (float)(texPoolParams.m_texturePatchWidth + 2.0f);
+				// map texture coords from tile scale to global tex map
+				vec2f chunkTexCoords = (md.m_TextureCoords[i] + vec2f(patch_x, patch_y) * (texPoolParams.m_texturePatchWidth + 2)) / textureTileWidth / (texPoolParams.m_texturePatchWidth + 2);
+				md.m_TextureCoords[i] = (chunk2globalTexOrigin + chunkTexCoords / numGlobalTexTilesWidth);
+				// mirror y axis in UV space
+				md.m_TextureCoords[i].y = 1 - md.m_TextureCoords[i].y;
+
 			}
 			printf("Texcoord indexing finish\n");
 
@@ -203,62 +216,15 @@ void CUDAMarchingCubesHashSDF::copyTrianglesToCPU(TexPoolData texPoolData, TexPo
 			exportTexture(d_textureImg, d_textureAddress, texPoolData.d_texPatches, textureTileWidth, textureTileWidth, texPoolParams.m_texturePatchWidth, texPoolParams.m_texturePatchSize, h_numTextureTile, texPoolParams.m_numTexturePatches);
 			cudaMemcpy(h_textureImg, d_textureImg, sizeof(uchar) * 3 * (texPoolParams.m_texturePatchWidth + 2) * (texPoolParams.m_texturePatchWidth + 2) * textureTileWidth * textureTileWidth, cudaMemcpyDeviceToHost);
 
-			printf("Generate texture\n");
+			const uint texWidth = textureTileWidth * (texPoolParams.m_texturePatchWidth + 2);
+			cv::Mat textureMat(texWidth, texWidth, CV_8UC3, h_textureImg);
+			// copy texture tile to global Texture
+			textureMat.copyTo(globalTexMap(cv::Rect(
+				cv::Point(texTileWidthStart, texTileHeightStart),
+				cv::Point(texTileWidthStart + texWidth, texTileHeightStart + texWidth)
+			)));
 
-			unsigned int size = textureTileWidth * textureTileWidth * (texPoolParams.m_texturePatchWidth + 2) * (texPoolParams.m_texturePatchWidth + 2);
-
-			std::string folderName = "Scans/";
-			std::string textureFileName = GlobalAppState::get().s_sceneName + GlobalAppState::get().export_surfix[GlobalAppState::get().s_optimizationIdx] + "_texture.png";
-			std::string mtlFileName = GlobalAppState::get().s_sceneName + GlobalAppState::get().export_surfix[GlobalAppState::get().s_optimizationIdx] + ".mtl";
-
-			std::string folderTextureFileName = folderName + GlobalAppState::get().s_sceneName + GlobalAppState::get().export_surfix[GlobalAppState::get().s_optimizationIdx] + "_texture.png";
-			std::string folderMtlFileName = folderName + GlobalAppState::get().s_sceneName + GlobalAppState::get().export_surfix[GlobalAppState::get().s_optimizationIdx] + ".mtl";
-
-			while (util::fileExists(folderTextureFileName)) {
-				std::string path = util::directoryFromPath(folderTextureFileName);
-				std::string curr = util::fileNameFromPath(folderTextureFileName);
-				std::string ext = util::getFileExtension(curr);
-				curr = util::removeExtensions(curr);
-				std::string base = util::getBaseBeforeNumericSuffix(curr);
-				unsigned int num = util::getNumericSuffix(curr);
-				if (num == (unsigned int)-1) {
-					num = 0;
-				}
-				folderTextureFileName = path + base + std::to_string(num + 1) + ".png" ;
-				textureFileName = base + std::to_string(num + 1) + ".png";
-			}
-
-			while (util::fileExists(folderMtlFileName)) {
-				std::string path = util::directoryFromPath(folderMtlFileName);
-				std::string curr = util::fileNameFromPath(folderMtlFileName);
-				std::string ext = util::getFileExtension(curr);
-				curr = util::removeExtensions(curr);
-				std::string base = util::getBaseBeforeNumericSuffix(curr);
-				unsigned int num = util::getNumericSuffix(curr);
-				if (num == (unsigned int)-1) {
-					num = 0;
-				}
-				folderMtlFileName = path + base + std::to_string(num + 1) + ".mtl";
-				mtlFileName = base + std::to_string(num + 1) + ".mtl";
-			}
-
-			GlobalAppState::get().export_mtlfilename.push_back(mtlFileName);
-
-			std::ofstream mtlout(folderMtlFileName, std::ios::out);
-			mtlout << "newmtl MAT_F436B0\n" 
-				<< "\tKa 1.0 1.0 1.0\n"
-				<< "\tKd 1.0 1.0 1.0\n"
-				<< "\tKs 1.0 1.0 1.0\n"
-				<< "\tillum 1.0\n"
-				<< "\tNs 1\n"
-				<< "\tmap_Kd " << textureFileName;
-			mtlout.close();
-
-			cv::Mat textureMat(textureTileWidth * (texPoolParams.m_texturePatchWidth + 2), textureTileWidth * (texPoolParams.m_texturePatchWidth + 2), CV_8UC3, h_textureImg);
-			cv::cvtColor(textureMat, textureMat, cv::COLOR_RGB2BGR);
-			cv::imwrite(folderTextureFileName, textureMat);
-
-			printf("Export texture\n");
+			std::cout << "Done generating texture tile" << std::endl;
 			//md.mergeCloseVertices(0.001f, true);
 			//md.removeDuplicateFaces();
 
@@ -387,32 +353,104 @@ void CUDAMarchingCubesHashSDF::extractIsoSurface(CUDASceneRepChunkGrid& chunkGri
 
 	chunkGrid.streamOutToCPUAll();
 
+	std::vector<vec3i> chunks;
+
 	for (int x = minGridPos.x; x < maxGridPos.x; x++) {
 		for (int y = minGridPos.y; y < maxGridPos.y; y++) {
 			for (int z = minGridPos.z; z < maxGridPos.z; z++) {
-
 				vec3i chunk(x, y, z);
-
 				if (chunkGrid.containsSDFBlocksChunk(chunk)) {
-
-					std::cout << "Marching Cubes on chunk (" << x << ", " << y << ", " << z << ") " << std::endl;
-
-					chunkGrid.streamInToGPUChunkNeighborhood(chunk, 1);
-
-					const vec3f& chunkCenter = chunkGrid.getWorldPosChunk(chunk);
-					const vec3f& voxelExtends = chunkGrid.getVoxelExtends();
-					float virtualVoxelSize = chunkGrid.getHashParams().m_virtualVoxelSize;
-
-					vec3f minCorner = chunkCenter - voxelExtends / 2.0f - vec3f(virtualVoxelSize, virtualVoxelSize, virtualVoxelSize)*(float)chunkGrid.getHashParams().m_SDFBlockSize;
-					vec3f maxCorner = chunkCenter + voxelExtends / 2.0f + vec3f(virtualVoxelSize, virtualVoxelSize, virtualVoxelSize)*(float)chunkGrid.getHashParams().m_SDFBlockSize;
-
-					extractIsoSurface(chunkGrid.getHashData(), chunkGrid.getHashParams(), rayCastData, texPoolData, texPoolParams, minCorner, maxCorner, true);
-
-					chunkGrid.streamOutToCPUAll();
+					chunks.push_back(chunk);
 				}
 			}
 		}
 	}
+	
+	// padding around each individual texture patch (chosen minimally)
+	const uint texPadding = 1;
+	// a patch corresponds to a single voxel (e.g. 8x8 px)
+	const uint texPatchWidth = texPoolParams.m_texturePatchWidth + 2 * texPadding;
+	// a tile correspondes to the set of patches corresponding to a single chunk
+	const uint texTileWidth = texPoolParams.m_numTextureTileWidth * texPatchWidth;
+	// the map is the set of all texture patches next to each other
+	numGlobalTexTilesWidth = (uint)ceil(sqrt(chunks.size()));
+	globalTexMapWidth = numGlobalTexTilesWidth * (texTileWidth + texPadding);
+
+	globalTexMap = cv::Mat(globalTexMapWidth, globalTexMapWidth, CV_8UC3);
+	for (int i = 0; i < chunks.size(); i++) {
+		vec3i chunk = chunks[i];
+		int x = chunk.x, y = chunk.y, z = chunk.z;
+		std::cout << "Marching Cubes on chunk (" << x << ", " << y << ", " << z << ") " << std::endl;
+
+		chunkGrid.streamInToGPUChunkNeighborhood(chunk, 1);
+
+		const vec3f& chunkCenter = chunkGrid.getWorldPosChunk(chunk);
+		const vec3f& voxelExtends = chunkGrid.getVoxelExtends();
+		float virtualVoxelSize = chunkGrid.getHashParams().m_virtualVoxelSize;
+
+		vec3f minCorner = chunkCenter - voxelExtends / 2.0f - vec3f(virtualVoxelSize, virtualVoxelSize, virtualVoxelSize)*(float)chunkGrid.getHashParams().m_SDFBlockSize;
+		vec3f maxCorner = chunkCenter + voxelExtends / 2.0f + vec3f(virtualVoxelSize, virtualVoxelSize, virtualVoxelSize)*(float)chunkGrid.getHashParams().m_SDFBlockSize;
+		
+		const uint texTileWidthStart = (i * (texTileWidth + texPadding)) % globalTexMapWidth;
+		const uint texTileHeightStart = (texTileWidth + texPadding) * ((i * (texTileWidth + texPadding)) / globalTexMapWidth);
+
+		extractIsoSurface(chunkGrid.getHashData(), chunkGrid.getHashParams(), rayCastData, texPoolData, texPoolParams, minCorner, maxCorner, true, texTileWidthStart, texTileHeightStart);
+		chunkGrid.streamOutToCPUAll();
+	}
+
+	// write global Texture map to disk
+	std::string folderName = "Scans/";
+	std::string textureFileName = GlobalAppState::get().s_sceneName + GlobalAppState::get().export_surfix[GlobalAppState::get().s_optimizationIdx] + "_texture.png";
+	std::string mtlFileName = GlobalAppState::get().s_sceneName + GlobalAppState::get().export_surfix[GlobalAppState::get().s_optimizationIdx] + ".mtl";
+
+	std::string folderTextureFileName = folderName + GlobalAppState::get().s_sceneName + GlobalAppState::get().export_surfix[GlobalAppState::get().s_optimizationIdx] + "_texture.png";
+	std::string folderMtlFileName = folderName + GlobalAppState::get().s_sceneName + GlobalAppState::get().export_surfix[GlobalAppState::get().s_optimizationIdx] + ".mtl";
+
+	while (util::fileExists(folderTextureFileName)) {
+		std::string path = util::directoryFromPath(folderTextureFileName);
+		std::string curr = util::fileNameFromPath(folderTextureFileName);
+		std::string ext = util::getFileExtension(curr);
+		curr = util::removeExtensions(curr);
+		std::string base = util::getBaseBeforeNumericSuffix(curr);
+		unsigned int num = util::getNumericSuffix(curr);
+		if (num == (unsigned int)-1) {
+			num = 0;
+		}
+		folderTextureFileName = path + base + std::to_string(num + 1) + ".png" ;
+		textureFileName = base + std::to_string(num + 1) + ".png";
+	}
+	while (util::fileExists(folderMtlFileName)) {
+		std::string path = util::directoryFromPath(folderMtlFileName);
+		std::string curr = util::fileNameFromPath(folderMtlFileName);
+		std::string ext = util::getFileExtension(curr);
+		curr = util::removeExtensions(curr);
+		std::string base = util::getBaseBeforeNumericSuffix(curr);
+		unsigned int num = util::getNumericSuffix(curr);
+		if (num == (unsigned int)-1) {
+			num = 0;
+		}
+		folderMtlFileName = path + base + std::to_string(num + 1) + ".mtl";
+		mtlFileName = base + std::to_string(num + 1) + ".mtl";
+	}
+
+	GlobalAppState::get().export_mtlfilename.push_back(mtlFileName);
+
+	std::ofstream mtlout(folderMtlFileName, std::ios::out);
+	mtlout << "newmtl MAT_F436B0\n" 
+		<< "\tKa 1.0 1.0 1.0\n"
+		<< "\tKd 1.0 1.0 1.0\n"
+		<< "\tKs 1.0 1.0 1.0\n"
+		<< "\tillum 1.0\n"
+		<< "\tNs 1\n"
+		<< "\tmap_Kd " << textureFileName;
+	mtlout.close();
+	
+
+	cv::cvtColor(globalTexMap, globalTexMap, cv::COLOR_RGB2BGR);
+	cv::imwrite(folderTextureFileName, globalTexMap);
+
+	std::cout << "Export texture done: " << folderTextureFileName << std::endl << std::endl;
+
 
 	unsigned int nStreamedBlocks;
 	chunkGrid.streamInToGPUAll(camPos, radius, true, nStreamedBlocks);
@@ -420,7 +458,9 @@ void CUDAMarchingCubesHashSDF::extractIsoSurface(CUDASceneRepChunkGrid& chunkGri
 	chunkGrid.startMultiThreading();
 }
 
-void CUDAMarchingCubesHashSDF::extractIsoSurface(const HashData& hashData, const HashParams& hashParams, const RayCastData& rayCastData, const TexPoolData& texPoolData, const TexPoolParams& texPoolParams, const vec3f& minCorner, const vec3f& maxCorner, bool boxEnabled)
+void CUDAMarchingCubesHashSDF::extractIsoSurface(const HashData& hashData, const HashParams& hashParams, const RayCastData& rayCastData, 
+	const TexPoolData& texPoolData, const TexPoolParams& texPoolParams, const vec3f& minCorner, const vec3f& maxCorner, bool boxEnabled, 
+	const uint texTileWidthStart, const uint texTileHeightStart)
 {
 	resetMarchingCubesCUDA(m_data);
 
@@ -435,8 +475,8 @@ void CUDAMarchingCubesHashSDF::extractIsoSurface(const HashData& hashData, const
 	extractIsoSurfacePass1CUDA(hashData, rayCastData, m_params, m_data);
 	extractIsoSurfacePass2CUDA(hashData, rayCastData, m_params, m_data, texPoolData, m_data.getNumOccupiedBlocks());
 
-	std::cout << "Isosurface finish\n" << std::endl;
-	copyTrianglesToCPU(texPoolData, texPoolParams);
+	std::cout << "Isosurface finish" << std::endl;
+	copyTrianglesToCPU(texPoolData, texPoolParams, texTileWidthStart, texTileHeightStart);
 }
 
 /*

@@ -87,7 +87,7 @@ s_colorCropHeight = 480;
 //s_SDFTruncation = 0.05f;				//truncation in meter (5.0f*s_SDFVoxelSize )
 //s_SDFTruncationScale = 0.025f;			//truncation scale in meter per meter (2.5f*s_SDFVoxelSize )
 
-s_SDFVoxelSize = 0.02;				//voxel size in meter
+s_SDFVoxelSize = 0.015;				//voxel size in meter
 s_SDFMarchingCubeThreshFactor = 10.0f;	//marching cube thresh: s_SDFMarchingCubeThresh = s_SDFMarchingCubeThreshFactor*s_SDFVoxelSize
 s_SDFTruncation = 0.02f;				//truncation in meter (5.0f*s_SDFVoxelSize )
 s_SDFTruncationScale = 0.01f;			//truncation scale in meter per meter (2.5f*s_SDFVoxelSize )
