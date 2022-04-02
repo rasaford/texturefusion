@@ -52,7 +52,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <ExecutablePath>$(DXSDK_DIR)Utilities\bin\x64;$(DXSDK_DIR)Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
-    <IncludePath>$(IncludePath);$(WindowsSDK_IncludePath);$(KINECTSDK10_DIR)\inc;$(KINECTSDK20_DIR)\inc;$(OPENNI2_INCLUDE64);$(DXSDK_DIR)Include;./Source/;./Include;./Include/Intel;./Include/cutil/inc;./Include/Uplink;C:\Users\14109\Downloads\opencv\opencv_contrib-4.4.0\modules\cudaarithm\include;C:\Users\14109\Downloads\opencv\opencv_contrib-4.4.0\modules\cudaoptflow\include;C:\Users\14109\Downloads\opencv\build\include</IncludePath>
+    <IncludePath>$(IncludePath);$(WindowsSDK_IncludePath);$(KINECTSDK10_DIR)\inc;$(KINECTSDK20_DIR)\inc;$(OPENNI2_INCLUDE64);$(DXSDK_DIR)Include;./Source/;./Include;./Include/Intel;./Include/cutil/inc;./Include/Uplink</IncludePath>
     <LibraryPath>$(LibraryPath);$(DXSDK_DIR)Lib\x64;$(KINECTSDK10_DIR)\lib\amd64;$(CUDA_LIB_PATH);$(KINECTSDK20_DIR)\lib\x64;$(OPENNI2_LIB64);Libs</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

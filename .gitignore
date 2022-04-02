@@ -9,3 +9,5 @@ zParametersManolisScan.txt
 *.tlog
 *FileListAbsolute.txt
 Scans/
+Datasets/
+x64/
