@@ -705,9 +705,9 @@ extern "C" unsigned int findZeroCrossingVoxelsCUDA(HashData& hashData, HashParam
 
 	// for debug
 	//cutilSafeCall(cudaMemcpy(&res, hashData.d_voxelZeroCrossCounter, sizeof(unsigned int), cudaMemcpyDeviceToHost));
-	std::cout << "zeroCrossingVoxelCounter: " << res <<" "<< hashParams.m_hashNumBuckets * 2 << std::endl;
+	//std::cout << "zeroCrossingVoxelCounter: " << res <<" "<< hashParams.m_hashNumBuckets * 2 << std::endl;
 	//cutilSafeCall(cudaMemcpy(&res, texPoolData.d_heapCounter, sizeof(unsigned int), cudaMemcpyDeviceToHost));
-	std::cout << "texheapCounter: " << res << std::endl;
+	//std::cout << "texheapCounter: " << res << std::endl;
 
 	cutilSafeCall(cudaMemset(hashData.d_voxelZeroCrossCounter, 0, sizeof(int)));
 
@@ -718,10 +718,11 @@ extern "C" unsigned int findZeroCrossingVoxelsCUDA(HashData& hashData, HashParam
 
 	}
 
-	//cutilSafeCall(cudaMemcpy(&res, texPoolData.d_heapCounter, sizeof(unsigned int), cudaMemcpyDeviceToHost));
+	cutilSafeCall(cudaMemcpy(&res, texPoolData.d_heapCounter, sizeof(unsigned int), cudaMemcpyDeviceToHost));
 	std::cout << "texheapCounter: " << res << std::endl;
 	cutilSafeCall(cudaMemcpy(&res, hashData.d_voxelZeroCrossCounter, sizeof(unsigned int), cudaMemcpyDeviceToHost));
-	//std::cout << "zeroCrossingVoxelCounter: " << res << std::endl;
+	std::cout << "zeroCrossingVoxelCounter: " << res << " of " << hashParams.m_hashNumBuckets
+		<< " -> " << 100 * (float) res / (float) hashParams.m_hashNumBuckets << "%" << std::endl;
 	return res;
 
 #ifdef _DEBUG

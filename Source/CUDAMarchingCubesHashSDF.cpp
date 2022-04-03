@@ -257,8 +257,8 @@ void CUDAMarchingCubesHashSDF::saveMesh(const std::string& filename, const mat4f
 
 	//std::string actualFilename = filename;
 	std::string actualFilename = "Scans/" + GlobalAppState::get().s_sceneName + GlobalAppState::get().export_surfix[GlobalAppState::get().s_optimizationIdx] + ".obj";
-	std::string actualFilenameOFF = "Scans/" + GlobalAppState::get().s_sceneName + GlobalAppState::get().export_surfix[GlobalAppState::get().s_optimizationIdx] + ".off";
-	std::string actualFilenamePLY = "Scans/" + GlobalAppState::get().s_sceneName + GlobalAppState::get().export_surfix[GlobalAppState::get().s_optimizationIdx] + ".ply";
+	//std::string actualFilenameOFF = "Scans/" + GlobalAppState::get().s_sceneName + GlobalAppState::get().export_surfix[GlobalAppState::get().s_optimizationIdx] + ".off";
+	//std::string actualFilenamePLY = "Scans/" + GlobalAppState::get().s_sceneName + GlobalAppState::get().export_surfix[GlobalAppState::get().s_optimizationIdx] + ".ply";
 	if (!overwriteExistingFile) {
 		while (util::fileExists(actualFilename)) {
 			std::string path = util::directoryFromPath(actualFilename);
@@ -271,8 +271,8 @@ void CUDAMarchingCubesHashSDF::saveMesh(const std::string& filename, const mat4f
 				num = 0;
 			}
 			actualFilename = path + base + std::to_string(num + 1) + "." + ext;
-			actualFilenamePLY = path + base + std::to_string(num + 1) + ".ply";
-			actualFilenameOFF = path + base + std::to_string(num + 1) + ".off";
+			//actualFilenamePLY = path + base + std::to_string(num + 1) + ".ply";
+			//actualFilenameOFF = path + base + std::to_string(num + 1) + ".off";
 
 		}
 	}
@@ -308,32 +308,34 @@ void CUDAMarchingCubesHashSDF::saveMesh(const std::string& filename, const mat4f
 	}
 	std::string mtlfilename = GlobalAppState::get().export_mtlfilename.back();
 	GlobalAppState::get().export_mtlfilename.pop_back();
-
-	std::cout << "saving mesh (" << actualFilenameOFF << ") ...";
-	MeshIOf::saveToFile(actualFilenameOFF, m_meshData);
-	std::cout << "done!" << std::endl;
+	// only save .obj file here, as it is the only one that also has UV texture coordinates
+	// of the three variants below
+	// std::cout << "saving mesh (" << actualFilenameOFF << ") ...";
+	// MeshIOf::saveToFile(actualFilenameOFF, m_meshData);
+	// std::cout << "done!" << std::endl;
 
 	std::cout << "saving mesh (" << actualFilename << ") ...";
 	MeshIOf::saveToFile(actualFilename, m_meshData);
 	std::cout << "done!" << std::endl;
-
+	
+	/*
 	m_meshOnlyData.removeDuplicateVertices();
 	std::cout << "merging close vertices... ";
-	//m_meshOnlyData.mergeCloseVertices(0.0001f, true);
+	m_meshOnlyData.mergeCloseVertices(0.0001f, true);
 	std::cout << "done!" << std::endl;
 	std::cout << "removing duplicate faces... ";
-	//m_meshOnlyData.removeDuplicateFaces();
+	m_meshOnlyData.removeDuplicateFaces();
 	std::cout << "done!" << std::endl;
-
 	std::cout << "size after:\t" << m_meshOnlyData.m_Vertices.size() << std::endl;
+	*/ 
 
 	if (transform) {
 		m_meshOnlyData.applyTransform(mat4f::identity()); // *transform);
 	}
 
-	std::cout << "saving mesh (" << actualFilenamePLY << ") ...";
-	MeshIOf::saveToFile(actualFilenamePLY, m_meshOnlyData);
-	std::cout << "done!" << std::endl;
+	//std::cout << "saving mesh (" << actualFilenamePLY << ") ...";
+	//MeshIOf::saveToFile(actualFilenamePLY, m_meshOnlyData);
+	// std::cout << "done!" << std::endl;
 
 
 	reset();
