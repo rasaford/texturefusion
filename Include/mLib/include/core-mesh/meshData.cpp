@@ -476,8 +476,19 @@ void MeshData<FloatType>::merge( const MeshData<FloatType>& other )
     if (other.isEmpty()) {
         return;
     }
-	if (isEmpty()) {	
-		*this = other;
+	if (isEmpty()) {
+		
+		m_Vertices = std::move(other.m_Vertices);
+		m_Normals = std::move(other.m_Normals);
+		m_TextureCoords = std::move(other.m_TextureCoords);
+		m_Colors = std::move(other.m_Colors);
+		m_FaceIndicesVertices = std::move(other.m_FaceIndicesVertices);
+		m_FaceIndicesNormals = std::move(other.m_FaceIndicesNormals);
+		m_FaceIndicesTextureCoords = std::move(other.m_FaceIndicesTextureCoords);
+		m_FaceIndicesColors = std::move(other.m_FaceIndicesColors);
+		m_MaterialFile = std::move(other.m_MaterialFile);
+		m_MaterialIndices = std::move(other.m_MaterialIndices);
+		//*this = a;
 		return;
 	}
 

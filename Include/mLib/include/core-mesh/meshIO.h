@@ -36,7 +36,7 @@ public:
 		}
 	}
 
-	static void saveToFile(const std::string& filename, const MeshData<FloatType>& mesh, const std::string &mtlfilename = "") {
+	static void saveToFile(const std::string& filename, const MeshData<FloatType>& mesh) {
 
 		if (mesh.isEmpty()) {		
 			MLIB_WARNING("empty mesh");
@@ -54,7 +54,7 @@ public:
 		} else if (extension == "ply") {
 			saveToPLY(filename, mesh);
 		} else if (extension == "obj") {
-			saveToOBJ(filename, mesh, mtlfilename);
+			saveToOBJ(filename, mesh);
 		} else {
 			throw MLIB_EXCEPTION("unknown file format: " + filename);
 		}
@@ -80,9 +80,7 @@ public:
 
 	static void saveToOFF(const std::string& filename, const MeshData<FloatType>& mesh);
 
-	static void saveToOBJ(const std::string & filename, const MeshData<FloatType>& mesh, const std::string & mtlfilename = "");
-
-	//static void saveToOBJ(const std::string& filename, const MeshData<FloatType>& mesh);
+	static void saveToOBJ(const std::string& filename, const MeshData<FloatType>& mesh);
 
 private:
 

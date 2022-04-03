@@ -11,13 +11,6 @@ public:
 		setIdentity();
 	}
 
-	void setMatrices(mat4f& intrinsic, mat4f& extrinsic = mat4f::identity()) {
-		m_Intrinsic = intrinsic;
-		m_Extrinsic = extrinsic;
-		m_IntrinsicInverse = m_Intrinsic.getInverse();
-		m_ExtrinsicInverse = m_Extrinsic.getInverse();
-	}
-
 	void setIdentity() {
 		m_Intrinsic.setIdentity();
 		m_IntrinsicInverse.setIdentity();
@@ -25,6 +18,12 @@ public:
 		m_ExtrinsicInverse.setIdentity();
 	}
 
+	void setMatrices(const mat4f& intrinsic, const mat4f& extrinsic) {
+		m_Intrinsic = intrinsic;
+		m_Extrinsic = extrinsic;
+		m_IntrinsicInverse = m_Intrinsic.getInverse();
+		m_ExtrinsicInverse = m_Extrinsic.getInverse();
+	}
 
 	//! Camera-to-Proj matrix
 	mat4f m_Intrinsic;

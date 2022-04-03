@@ -400,6 +400,7 @@ public:
 
 
 	MeshData() {}
+	MeshData(MeshData& ) = delete;
 	MeshData(MeshData&& d) {
 		m_Vertices = std::move(d.m_Vertices);
 		m_Normals = std::move(d.m_Normals);

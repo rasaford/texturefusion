@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(OPENCV_DIR)\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(OPENCV_DIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opencv_aruco440.lib;opencv_bgsegm440.lib;opencv_bioinspired440.lib;opencv_calib3d440.lib;opencv_ccalib440.lib;opencv_core440.lib;opencv_cudaarithm440.lib;opencv_cudabgsegm440.lib;opencv_cudacodec440.lib;opencv_cudafeatures2d440.lib;opencv_cudafilters440.lib;opencv_cudaimgproc440.lib;opencv_cudalegacy440.lib;opencv_cudaobjdetect440.lib;opencv_cudaoptflow440.lib;opencv_cudastereo440.lib;opencv_cudawarping440.lib;opencv_cudev440.lib;opencv_datasets440.lib;opencv_dnn440.lib;opencv_dnn_objdetect440.lib;opencv_dnn_superres440.lib;opencv_dpm440.lib;opencv_face440.lib;opencv_features2d440.lib;opencv_flann440.lib;opencv_fuzzy440.lib;opencv_hfs440.lib;opencv_highgui440.lib;opencv_img_hash440.lib;opencv_imgcodecs440.lib;opencv_imgproc440.lib;opencv_intensity_transform440.lib;opencv_line_descriptor440.lib;opencv_ml440.lib;opencv_objdetect440.lib;opencv_optflow440.lib;opencv_phase_unwrapping440.lib;opencv_photo440.lib;opencv_plot440.lib;opencv_quality440.lib;opencv_rapid440.lib;opencv_reg440.lib;opencv_rgbd440.lib;opencv_saliency440.lib;opencv_shape440.lib;opencv_stereo440.lib;opencv_stitching440.lib;opencv_structured_light440.lib;opencv_superres440.lib;opencv_surface_matching440.lib;opencv_text440.lib;opencv_tracking440.lib;opencv_video440.lib;opencv_videoio440.lib;opencv_videostab440.lib;opencv_xfeatures2d440.lib;opencv_ximgproc440.lib;opencv_xobjdetect440.lib;opencv_xphoto440.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup />
+</Project>

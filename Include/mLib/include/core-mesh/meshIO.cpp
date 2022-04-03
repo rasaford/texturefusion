@@ -1,4 +1,3 @@
-#include "meshIO.h"
 
 #ifndef CORE_MESH_MESHIO_INL_H_
 #define CORE_MESH_MESHIO_INL_H_
@@ -596,7 +595,7 @@ void MeshIO<FloatType>::saveToOFF( const std::string& filename, const MeshData<F
 
 
 template <class FloatType>
-void MeshIO<FloatType>::saveToOBJ( const std::string& filename, const MeshData<FloatType>& mesh, const std::string& mtlfilename = "")
+void MeshIO<FloatType>::saveToOBJ( const std::string& filename, const MeshData<FloatType>& mesh )
 {
 	std::ofstream file(filename);
 	if (!file.is_open())	throw MLIB_EXCEPTION("Could not open file for writing " + filename);
@@ -613,10 +612,6 @@ void MeshIO<FloatType>::saveToOBJ( const std::string& filename, const MeshData<F
 	file << "#\n";
 	file << "####\n";
 
-	if (mtlfilename != "") {
-		file << "mtllib " << mtlfilename << "\n" << "usemtl MAT_F436B0\n\n";
-	}
-
 	for (size_t i = 0; i < mesh.m_Vertices.size(); i++) {
 		file << "v ";
 		file << mesh.m_Vertices[i].x << " " << mesh.m_Vertices[i].y << " " << mesh.m_Vertices[i].z;
@@ -631,21 +626,21 @@ void MeshIO<FloatType>::saveToOBJ( const std::string& filename, const MeshData<F
 	}
 	for (size_t i = 0; i < mesh.m_TextureCoords.size(); i++) {
 		file << "vt ";
-		file << mesh.m_TextureCoords[i].x << " " << 1.0f - mesh.m_TextureCoords[i].y << "\n";
+		file << mesh.m_TextureCoords[i].x << " " << mesh.m_TextureCoords[i].y << "\n";
 	}
 	for (unsigned int i = 0; i < mesh.m_FaceIndicesVertices.size(); i++) {
 		file << "f ";
 		for (unsigned int j = 0; j < mesh.m_FaceIndicesVertices[i].size(); j++) {
 			file << mesh.m_FaceIndicesVertices[i][j]+1;
-			if (mesh.m_FaceIndicesTextureCoords.size() > 0) {// || mesh.m_FaceIndicesNormals.size() > 0) {
+			if (mesh.m_FaceIndicesTextureCoords.size() > 0 || mesh.m_FaceIndicesNormals.size() > 0) {
 				file << "/";
 				if (mesh.m_FaceIndicesTextureCoords.size() > 0) {
 					file << mesh.m_FaceIndicesTextureCoords[i][j]+1;
 				}
-				//file << "/";
-				//if (mesh.m_FaceIndicesNormals.size() > 0) {
-				//	file << mesh.m_FaceIndicesNormals[i][j]+1;
-				//}
+				if (mesh.m_FaceIndicesNormals.size() > 0) {
+					file << "//";
+					file << mesh.m_FaceIndicesNormals[i][j]+1;
+				}
 			}
 			file << " ";
 		}

@@ -4,7 +4,7 @@ s_sensorIdx = 9;
 //fountail
 s_sceneName = "fountain";
 //s_binaryDumpSensorFile[0] = "data/fountain_all";
-s_binaryDumpSensorFile[0] = "D:/dataset/fountain_all";
+s_binaryDumpSensorFile[0] = "D:\realsense_depth_color_img\extracted\further_away";
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // parameters for our implementation
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -22,7 +22,7 @@ s_autoExposureEnabled = false;
 s_autoWhiteBalanceEnabled = false;
 
 s_renderToFile = false;	//for making paper videos: renders all input/raycasts etc. to images
-s_renderToFileDir = "c:/output/fountain4/";
+s_renderToFileDir = "C:\Users\max\Downloads\realsense_depth_color\test\";
 
 // Enable voxel rendering or not
 s_voxelRenderingEnabled  = false;
@@ -31,7 +31,7 @@ s_voxelRenderingEnabled  = false;
 s_texKeyFrames = 2;
 
 // used when we use record files
-s_nVideoFrame = 700;
+s_nVideoFrame = 500; // 2000;
 //s_nVideoFrame = 0;
 s_startFrame = 0;
 
@@ -39,13 +39,12 @@ s_startFrame = 0;
 s_texPoolPatchWidth = 4;
 
 // The number of preallocated tiles in GPU
-s_texPoolNumPatches =2000000;
-//8000000
-s_numTextureTileWidth = 1024;
+s_texPoolNumPatches = 8000000;
+s_numTextureTileWidth = 512;
 
 // About blending weights
 s_texIntegrationWeightMax = 255;
-s_texIntegrationWeightSample = 30; 
+s_texIntegrationWeightSample = 30;
 
 // parameters for mask
 s_erodeSigmaStretch = 2.f;
@@ -67,8 +66,8 @@ s_sigmaArea = 1.0;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Screen parameters
-s_windowWidth = 640;		//render window width
-s_windowHeight = 480;		//render window height
+s_windowWidth = 1152;		//render window width
+s_windowHeight = 864;		//render window height
 s_adapterWidth = 640;		//input depth gets re-sampled to this width
 s_adapterHeight = 480;		//input depth gets re-sampled to this height
 
@@ -82,13 +81,7 @@ s_colorCropY = 272;
 s_colorCropWidth = 640;
 s_colorCropHeight = 480;
 
-// sdf and hash settings
-//s_SDFVoxelSize = 0.01;				//voxel size in meter
-//s_SDFMarchingCubeThreshFactor = 10.0f;	//marching cube thresh: s_SDFMarchingCubeThresh = s_SDFMarchingCubeThreshFactor*s_SDFVoxelSize
-//s_SDFTruncation = 0.05f;				//truncation in meter (5.0f*s_SDFVoxelSize )
-//s_SDFTruncationScale = 0.025f;			//truncation scale in meter per meter (2.5f*s_SDFVoxelSize )
-
-s_SDFVoxelSize = 0.004;				//voxel size in meter
+s_SDFVoxelSize = 0.01;				//voxel size in meter
 s_SDFMarchingCubeThreshFactor = 10.0f;	//marching cube thresh: s_SDFMarchingCubeThresh = s_SDFMarchingCubeThreshFactor*s_SDFVoxelSize
 s_SDFTruncation = 0.02f;				//truncation in meter (5.0f*s_SDFVoxelSize )
 s_SDFTruncationScale = 0.01f;			//truncation scale in meter per meter (2.5f*s_SDFVoxelSize )
@@ -98,8 +91,8 @@ s_SDFIntegrationWeightMax = 255;		//maximum integration weight for a voxel
 
 // s_SDFBlockSize is pound defined (SDF_BLOCK_SIZE)
 // s_hashBucketSize is pound defined (HASH_BUCKET_SIZE)
-s_hashNumBuckets = 200000;				//smaller voxels require more space
-s_hashNumSDFBlocks = 200000;			//smaller voxels require more space
+s_hashNumBuckets = 800000; //50000;				//smaller voxels require more space
+s_hashNumSDFBlocks = 150000;			//smaller voxels require more space
 s_hashMaxCollisionLinkedListSize = 5;
 
 // raycast
@@ -149,9 +142,9 @@ s_remappingDepthDiscontinuityThresLin	 = 0.016f;	// additional discontinuity thr
 
 s_bUseCameraCalibration = false;
 s_marchingCubesMaxNumTriangles = 2500000; // max buffer size for marching cube
-							    
+
 //streaming parameters
-s_streamingEnabled = false;
+s_streamingEnabled = true;
 s_streamingVoxelExtents = 1.0f 1.0f 1.0f;
 s_streamingGridDimensions = 513 513 513; // dimensions have to be odd (number of samples)
 s_streamingMinGridPos = -256 -256 -256;
@@ -167,5 +160,3 @@ s_recordDataFile = "Dump/test.sens";
 s_reconstructionEnabled = true;
 
 s_offlineProcessing = true;			//slower, but makes sure that all voxels are alllocated and streaming all blocks is enforced
-
-

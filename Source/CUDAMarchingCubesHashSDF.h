@@ -5,6 +5,8 @@
 #include "MarchingCubesSDFUtil.h"
 #include "CUDASceneRepChunkGrid.h"
 
+#include <opencv2\core.hpp>
+
 class CUDAMarchingCubesHashSDF
 {
 public:
@@ -28,9 +30,10 @@ public:
 	}
 	
 	
-	void clearMeshBuffer(void) {
+	void reset(void) {
 		m_meshData.clear();
 		m_meshOnlyData.clear();
+		globalTexMap.reset();
 	}
 
 	//! copies the intermediate result of extract isoSurfaceCUDA to the CPU and merges it with meshData
@@ -40,7 +43,9 @@ public:
 
 	//void extractIsoSurface(CUDASceneRepChunkGrid& chunkGrid, const RayCastData& rayCastData, const vec3f& camPos, float radius);
 	void extractIsoSurface(CUDASceneRepChunkGrid & chunkGrid, const RayCastData & rayCastData, const TexPoolData & texPoolData, const TexPoolParams & texPoolParams, const vec3f & camPos, float radius);
-	void extractIsoSurface(const HashData & hashData, const HashParams & hashParams, const RayCastData & rayCastData, const TexPoolData & texPoolData, const TexPoolParams & texPoolParams, const vec3f& minCorner = vec3f(0.0f, 0.0f, 0.0f), const vec3f& maxCorner = vec3f(0.0f, 0.0f, 0.0f), bool boxEnabled = false);
+	void extractIsoSurface(const HashData & hashData, const HashParams & hashParams, const RayCastData & rayCastData, const TexPoolData & texPoolData, const TexPoolParams & texPoolParams, 
+		const vec3f& minCorner, const vec3f& maxCorner, bool boxEnabled,  
+		const uint texTileWidthStart, const uint texTileHeightStart);
 	//void extractIsoSurface(const HashData& hashData, const HashParams& hashParams, const RayCastData& rayCastData, const vec3f& minCorner = vec3f(0.0f, 0.0f, 0.0f), const vec3f& maxCorner = vec3f(0.0f, 0.0f, 0.0f), bool boxEnabled = false);
 
 	//void extractIsoSurfaceCPU(const HashData& hashData, const HashParams& hashParams, const RayCastData& rayCastData);
@@ -53,7 +58,11 @@ private:
 	void create(const MarchingCubesParams& params);
 	void destroy(void);
 
-	void copyTrianglesToCPU(TexPoolData texPoolData, TexPoolParams texPoolParams);
+	void copyTrianglesToCPU(TexPoolData texPoolData, TexPoolParams texPoolParams, const uint texTileWidthStart, const uint texTileHeightStart);
+
+	std::unique_ptr<cv::Mat> globalTexMap;
+	uint globalTexMapWidth;
+	uint numGlobalTexTilesWidth;
 
 	MarchingCubesParams m_params;
 	MarchingCubesData	m_data;

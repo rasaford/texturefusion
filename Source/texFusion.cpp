@@ -279,14 +279,15 @@ void StopScanningAndExtractIsoSurfaceMC(const std::string& filename, bool overwr
 	// then now we have a texture map
 	// we assign texture coordinates to vertices with this map.
 
-	g_marchingCubesHashSDF->clearMeshBuffer();
+	g_marchingCubesHashSDF->reset();
 
 	if (!GlobalAppState::get().s_streamingEnabled) {
 
 		//g_chunkGrid->stopMultiThreading();
 		//g_chunkGrid->streamInToGPUAll();
 		std::cout << "Marching Cube 1" << std::endl;
-		g_marchingCubesHashSDF->extractIsoSurface(g_sceneRep->getHashData(), g_sceneRep->getHashParams(), g_rayCast->getRayCastData(), g_texUpdate->getTexPoolData(), g_texUpdate->getTexPoolParams());
+		throw std::invalid_argument("Streaming has to be enabled to write textures. TODO: fix this in the future");
+		//g_marchingCubesHashSDF->extractIsoSurface(g_sceneRep->getHashData(), g_sceneRep->getHashParams(), g_rayCast->getRayCastData(), g_texUpdate->getTexPoolData(), g_texUpdate->getTexPoolParams());
 		//g_chunkGrid->startMultiThreading();
 
 	}
@@ -808,7 +809,7 @@ void reconstruction(ID3D11DeviceContext* pd3dImmediateContext)
 				&& !GlobalAppState::get().s_binaryDumpSensorUseTrajectoryOnlyInit) {
 
 				//actually: nothing to do here; transform is already set: just don't do icp and use pre-recorded trajectory
-
+				std::cout << transformation << std::endl;
 				//transformation = g_RGBDAdapter.getRigidTransform();
 				//if (transformation[0] == -std::numeric_limits<float>::infinity()) {
 				//	std::cout << "INVALID FRAME" << std::endl;
@@ -824,6 +825,7 @@ void reconstruction(ID3D11DeviceContext* pd3dImmediateContext)
 					&& GlobalAppState::get().s_binaryDumpSensorUseTrajectoryOnlyInit) {
 					//deltaTransformEstimate = lastTransform.getInverse() * transformation;	//simple case; not ideal in case of drift
 					//deltaTransformEstimate = g_RGBDAdapter.getRigidTransform(-1).getInverse() * transformation;
+					std::cout << transformation << std::endl;
 				}
 
 				const bool useRGBDTracking = false;	//Depth vs RGBD
