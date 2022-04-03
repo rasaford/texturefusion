@@ -279,7 +279,7 @@ void StopScanningAndExtractIsoSurfaceMC(const std::string& filename, bool overwr
 	// then now we have a texture map
 	// we assign texture coordinates to vertices with this map.
 
-	g_marchingCubesHashSDF->clearMeshBuffer();
+	g_marchingCubesHashSDF->reset();
 
 	if (!GlobalAppState::get().s_streamingEnabled) {
 

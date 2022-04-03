@@ -219,7 +219,7 @@ void CUDAMarchingCubesHashSDF::copyTrianglesToCPU(TexPoolData texPoolData, TexPo
 			const uint texWidth = textureTileWidth * (texPoolParams.m_texturePatchWidth + 2);
 			cv::Mat textureMat(texWidth, texWidth, CV_8UC3, h_textureImg);
 			// copy texture tile to global Texture
-			textureMat.copyTo(globalTexMap(cv::Rect(
+			textureMat.copyTo((*globalTexMap)(cv::Rect(
 				cv::Point(texTileWidthStart, texTileHeightStart),
 				cv::Point(texTileWidthStart + texWidth, texTileHeightStart + texWidth)
 			)));
@@ -336,7 +336,7 @@ void CUDAMarchingCubesHashSDF::saveMesh(const std::string& filename, const mat4f
 	std::cout << "done!" << std::endl;
 
 
-	clearMeshBuffer();
+	reset();
 
 }
 
@@ -349,7 +349,7 @@ void CUDAMarchingCubesHashSDF::extractIsoSurface(CUDASceneRepChunkGrid& chunkGri
 	const vec3i& minGridPos = chunkGrid.getMinGridPos();
 	const vec3i& maxGridPos = chunkGrid.getMaxGridPos();
 
-	clearMeshBuffer();
+	reset();
 
 	chunkGrid.streamOutToCPUAll();
 
@@ -375,8 +375,8 @@ void CUDAMarchingCubesHashSDF::extractIsoSurface(CUDASceneRepChunkGrid& chunkGri
 	// the map is the set of all texture patches next to each other
 	numGlobalTexTilesWidth = (uint)ceil(sqrt(chunks.size()));
 	globalTexMapWidth = numGlobalTexTilesWidth * (texTileWidth + texPadding);
+	globalTexMap = std::unique_ptr<cv::Mat>(new cv::Mat(globalTexMapWidth, globalTexMapWidth, CV_8UC3));
 
-	globalTexMap = cv::Mat(globalTexMapWidth, globalTexMapWidth, CV_8UC3);
 	for (int i = 0; i < chunks.size(); i++) {
 		vec3i chunk = chunks[i];
 		int x = chunk.x, y = chunk.y, z = chunk.z;
@@ -446,8 +446,8 @@ void CUDAMarchingCubesHashSDF::extractIsoSurface(CUDASceneRepChunkGrid& chunkGri
 	mtlout.close();
 	
 
-	cv::cvtColor(globalTexMap, globalTexMap, cv::COLOR_RGB2BGR);
-	cv::imwrite(folderTextureFileName, globalTexMap);
+	cv::cvtColor(*globalTexMap, *globalTexMap, cv::COLOR_RGB2BGR);
+	cv::imwrite(folderTextureFileName, *globalTexMap);
 
 	std::cout << "Export texture done: " << folderTextureFileName << std::endl << std::endl;
 

@@ -30,9 +30,10 @@ public:
 	}
 	
 	
-	void clearMeshBuffer(void) {
+	void reset(void) {
 		m_meshData.clear();
 		m_meshOnlyData.clear();
+		globalTexMap.reset();
 	}
 
 	//! copies the intermediate result of extract isoSurfaceCUDA to the CPU and merges it with meshData
@@ -59,7 +60,7 @@ private:
 
 	void copyTrianglesToCPU(TexPoolData texPoolData, TexPoolParams texPoolParams, const uint texTileWidthStart, const uint texTileHeightStart);
 
-	cv::Mat globalTexMap;
+	std::unique_ptr<cv::Mat> globalTexMap;
 	uint globalTexMapWidth;
 	uint numGlobalTexTilesWidth;
 
