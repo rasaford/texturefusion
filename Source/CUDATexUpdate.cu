@@ -947,39 +947,26 @@ __global__ void texUpdateFromImageKernel(HashData hashData, TexUpdateData texUpd
 
 		
 
-							if (weight1 + weight2 > 0.f) {
-
 #ifdef UPDATE_WEIGHTBLENDING
+							if (weight1 + weight2 > 0.f) {
 								color = (weight1 * color1 + weight2 * color2) / (weight1 + weight2);
 								//color = make_float4(1, 0, 0, 1);
 								weight = fminf(weight1 + weight2, texUpdateParams.m_integrationWeightMax);
-
-								texPoolData.d_texPatches[texel_addr].color = make_uchar3(
-									color.x, color.y, color.z);
-								texPoolData.d_texPatches[texel_addr].color_dummy = make_uchar3(
-									color.x, color.y, color.z);
-								//	texPoolData.d_texPatches[texel_addr].color = make_uchar3(255, 0, 0);
-								texPoolData.d_texPatches[texel_addr].weight = weight + 0.5;
-#endif
-#ifdef UPDATE_WINNERTAKESALL
-								if (weight2 > weight1) {
-
-									color = color2;
-									//color = make_float4(1, 0, 0, 1);
-									weight = weight2;
-
-									texPoolData.d_texPatches[texel_addr].color = make_uchar3(
-										color.x, color.y, color.z);
-									texPoolData.d_texPatches[texel_addr].color_dummy = make_uchar3(
-										color.x, color.y, color.z);
-									//	texPoolData.d_texPatches[texel_addr].color = make_uchar3(255, 0, 0);
-									texPoolData.d_texPatches[texel_addr].weight = weight + 0.5;
-
-								}
-#endif
 							}
-							//	return;
-					//	}
+#endif						
+#ifdef UPDATE_WINNERTAKESALL
+							if (weight2 > weight1) {
+								color = color2;
+								//color = make_float4(1, 0, 0, 1);
+								weight = weight2;
+							}
+#endif
+							texPoolData.d_texPatches[texel_addr].color = make_uchar3(
+								color.x, color.y, color.z);
+							texPoolData.d_texPatches[texel_addr].color_dummy = make_uchar3(
+								color.x, color.y, color.z);
+							//	texPoolData.d_texPatches[texel_addr].color = make_uchar3(255, 0, 0);
+							texPoolData.d_texPatches[texel_addr].weight = weight + 0.5;
 						}
 					}
 				}

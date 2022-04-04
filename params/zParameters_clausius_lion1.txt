@@ -2,9 +2,9 @@
 s_sensorIdx = 9;
 
 //fountail
-s_sceneName = "firehose3";
+s_sceneName = "clausius_lion1";
 //s_binaryDumpSensorFile[0] = "data/fountain_all";
-s_binaryDumpSensorFile[0] = "D:\realsense_depth_color_img\extracted\firehose3";
+s_binaryDumpSensorFile[0] = "D:\realsense_depth_color_img\extracted\clausius_lion1";
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // parameters for our implementation
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -31,7 +31,7 @@ s_voxelRenderingEnabled  = false;
 s_texKeyFrames = 2;
 
 // used when we use record files
-s_nVideoFrame = 757; //650;
+s_nVideoFrame = 1416;
 //s_nVideoFrame = 0;
 s_startFrame = 0;
 
@@ -39,8 +39,8 @@ s_startFrame = 0;
 s_texPoolPatchWidth = 8;
 
 // The number of preallocated tiles in GPU
-s_texPoolNumPatches = 2000000;
-s_numTextureTileWidth = 128;
+s_texPoolNumPatches = 4000000;
+s_numTextureTileWidth = 256;
 
 // About blending weights
 s_texIntegrationWeightMax = 255;
@@ -66,8 +66,8 @@ s_sigmaArea = 1.0;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Screen parameters
-s_windowWidth = 1152;		//render window width
-s_windowHeight = 864;		//render window height
+s_windowWidth = 1280;		//render window width
+s_windowHeight = 720;		//render window height
 s_adapterWidth = 640;		//input depth gets re-sampled to this width
 s_adapterHeight = 480;		//input depth gets re-sampled to this height
 
@@ -83,7 +83,7 @@ s_colorCropHeight = 480;
 
 // sdf and hash settings
 
-s_SDFVoxelSize = 0.02;				//voxel size in meter
+s_SDFVoxelSize = 0.01;				//voxel size in meter
 s_SDFMarchingCubeThreshFactor = 10.0f;	//marching cube thresh: s_SDFMarchingCubeThresh = s_SDFMarchingCubeThreshFactor*s_SDFVoxelSize
 s_SDFTruncation = 0.02f;				//truncation in meter (5.0f*s_SDFVoxelSize )
 s_SDFTruncationScale = 0.01f;			//truncation scale in meter per meter (2.5f*s_SDFVoxelSize )
@@ -94,7 +94,7 @@ s_SDFIntegrationWeightMax = 255;		//maximum integration weight for a voxel
 // s_SDFBlockSize is pound defined (SDF_BLOCK_SIZE)
 // s_hashBucketSize is pound defined (HASH_BUCKET_SIZE)
 s_hashNumBuckets = 100000; //50000;				//smaller voxels require more space
-s_hashNumSDFBlocks = 50000;			//smaller voxels require more space
+s_hashNumSDFBlocks = 200000;			//smaller voxels require more space
 s_hashMaxCollisionLinkedListSize = 5;
 
 // raycast
