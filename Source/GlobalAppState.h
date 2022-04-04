@@ -100,6 +100,8 @@
 	X(std::string, s_renderToFileDir) \
 	X(unsigned int, s_texPoolNumPatches) \
 	X(unsigned int, s_texPoolPatchWidth) \
+	X(unsigned int, s_texGlobalWidth) \
+	X(unsigned int, s_texPatchPadding) \
 	X(float, s_erodeSigmaStretch) \
 	X(float, s_screenBoundaryWidth)\
 	X(int, s_gain)\

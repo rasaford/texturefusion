@@ -28,6 +28,13 @@ void CUDAMarchingCubesHashSDF::create(const MarchingCubesParams& params)
 	m_params = params;
 	m_data.allocate(m_params);
 
+	// global tex map stuff
+	globalTexMap = std::unique_ptr<cv::Mat>(new cv::Mat(m_params.m_texGlobalWidth, m_params.m_texGlobalWidth, CV_8UC3));
+	blockLocalIdxs = std::unique_ptr<std::vector<uint>>(new std::vector<uint>());
+	freeTexPatchCoords = vec2i(0, 0);
+	globalPatchIdx = 0;
+	blockPatchStartIdx = 0;
+
 	resetMarchingCubesCUDA(m_data);
 }
 
@@ -36,7 +43,7 @@ void CUDAMarchingCubesHashSDF::destroy(void)
 	m_data.free();
 }
 
-void CUDAMarchingCubesHashSDF::copyTrianglesToCPU(TexPoolData texPoolData, TexPoolParams texPoolParams, const uint texTileWidthStart, const uint texTileHeightStart) {
+void CUDAMarchingCubesHashSDF::copyTrianglesToCPU(TexPoolData texPoolData, TexPoolParams texPoolParams) {
 
 	//could  be a bit more efficient here; rather than allocating so much memory; just allocate depending on the triangle size;
 	MarchingCubesData cpuData = m_data.copyToCPU();
@@ -87,8 +94,8 @@ void CUDAMarchingCubesHashSDF::copyTrianglesToCPU(TexPoolData texPoolData, TexPo
 				uniqueTextureIndexInverse[uniqueTextureIndex[i]] = i;
 
 			//assign texture coordinates to each vertex.
-			vec2f chunk2globalTexOrigin = vec2f((float)texTileWidthStart / (float) globalTexMapWidth, 
-												(float)texTileHeightStart / (float)globalTexMapWidth);
+			// vec2f chunk2globalTexOrigin = vec2f((float)texTileWidthStart / (float) globalTexMapWidth, 
+			//										(float)texTileHeightStart / (float)globalTexMapWidth);
 
 			for (unsigned int i = 0; i < 3 * nTriangles; i++) {
 				unsigned int index = 0;
@@ -100,8 +107,8 @@ void CUDAMarchingCubesHashSDF::copyTrianglesToCPU(TexPoolData texPoolData, TexPo
 				unsigned int patch_y = unsigned int(index / textureTileWidth);
 				unsigned int patch_x = unsigned int(index % textureTileWidth);
 				// map texture coords from tile scale to global tex map
-				vec2f chunkTexCoords = (m_meshData.m_TextureCoords[i] + vec2f(patch_x, patch_y) * (texPoolParams.m_texturePatchWidth + 2)) / textureTileWidth / (texPoolParams.m_texturePatchWidth + 2);
-				m_meshData.m_TextureCoords[i] = chunk2globalTexOrigin + chunkTexCoords / numGlobalTexTilesWidth;
+				m_meshData.m_TextureCoords[i] = (m_meshData.m_TextureCoords[i] + vec2f(patch_x, patch_y) * (texPoolParams.m_texturePatchWidth + 2)) / textureTileWidth / (texPoolParams.m_texturePatchWidth + 2);
+				// m_meshData.m_TextureCoords[i] = chunk2globalTexOrigin + chunkTexCoords / numGlobalTexTilesWidth;
 			}
 			printf("Texcoord indexing finish\n");
 
@@ -167,29 +174,54 @@ void CUDAMarchingCubesHashSDF::copyTrianglesToCPU(TexPoolData texPoolData, TexPo
 			uniqueTextureIndexInverse.resize(texPoolParams.m_numTexturePatches);
 			memset(uniqueTextureIndexInverse.data(), texPoolParams.m_numTexturePatches + 1, sizeof(uint) * texPoolParams.m_numTexturePatches);
 
-			for (unsigned int i = 0; i < uniqueTextureIndex.size(); i++)
+			for (unsigned int i = 0; i < uniqueTextureIndex.size(); i++) {
 				uniqueTextureIndexInverse[uniqueTextureIndex[i]] = i;
+				if (i > texPoolParams.m_numTexturePatches) {
+					throw MLIB_EXCEPTION("not enough memory to store texture for heap; increase s_texPoolNumPatches");
+				}
+			}
+			
+			// host texture image	
+			uchar *h_textureImg = (uchar *)malloc(sizeof(uchar) * 3 * (texPoolParams.m_texturePatchWidth + 2) * (texPoolParams.m_texturePatchWidth + 2) * textureTileWidth * textureTileWidth);
+			// device texture image
+			uchar *d_textureImg;
+			unsigned int *d_textureAddress;
+			cutilSafeCall(cudaMalloc(&d_textureImg, sizeof(uchar) * 3 * (texPoolParams.m_texturePatchWidth + 2) * (texPoolParams.m_texturePatchWidth + 2) * textureTileWidth * textureTileWidth));
+			cudaMemset(d_textureImg, 0, sizeof(uchar) * 3 * (texPoolParams.m_texturePatchWidth + 2) * (texPoolParams.m_texturePatchWidth + 2) * textureTileWidth * textureTileWidth);
+			cutilSafeCall(cudaMalloc(&d_textureAddress, sizeof(unsigned int) * textureTileWidth * textureTileWidth));
+			cudaMemset(d_textureAddress, 0, sizeof(unsigned int) * textureTileWidth * textureTileWidth);
+			// export texture from texPool to h_textureImg
+			cudaMemcpy(d_textureAddress, uniqueTextureIndex.data(), sizeof(unsigned int) * h_numTextureTile, cudaMemcpyHostToDevice);
+			exportTexture(d_textureImg, d_textureAddress, texPoolData.d_texPatches, textureTileWidth, textureTileWidth, texPoolParams.m_texturePatchWidth, texPoolParams.m_texturePatchSize, h_numTextureTile, texPoolParams.m_numTexturePatches);
+			cudaMemcpy(h_textureImg, d_textureImg, sizeof(uchar) * 3 * (texPoolParams.m_texturePatchWidth + 2) * (texPoolParams.m_texturePatchWidth + 2) * textureTileWidth * textureTileWidth, cudaMemcpyDeviceToHost);
+			
+			// create temporary cv::Mat for easy indexing
+			const uint texWidth = textureTileWidth * (texPoolParams.m_texturePatchWidth + 2);
+			cv::Mat textureMat(texWidth, texWidth, CV_8UC3, h_textureImg);
 
-			//assign texture coordinates to each vertex.
-			vec2f chunk2globalTexOrigin = vec2f((float)texTileWidthStart / (float) globalTexMapWidth, 
-												(float)texTileHeightStart / (float)globalTexMapWidth);
 			//assign texture coordinates to each vertex.
 			for (unsigned int i = 0; i < 3 * nTriangles; i++) {
-				unsigned int index = 0;
-				index = uniqueTextureIndexInverse[textureIndex[i]];
-				
-				if (index > texPoolParams.m_numTexturePatches)
-					throw MLIB_EXCEPTION("not enough memory to store texture for heap; increase s_texPoolNumPatches");
+				const unsigned int patch_idx = uniqueTextureIndexInverse[textureIndex[i]];
 
-				unsigned int patch_y = unsigned int(index / textureTileWidth);
-				unsigned int patch_x = unsigned int(index % textureTileWidth);
-				// map texture coords from tile scale to global tex map
-				vec2f chunkTexCoords = (md.m_TextureCoords[i] + vec2f(patch_x, patch_y) * (texPoolParams.m_texturePatchWidth + 2)) / textureTileWidth / (texPoolParams.m_texturePatchWidth + 2);
-				md.m_TextureCoords[i] = (chunk2globalTexOrigin + chunkTexCoords / numGlobalTexTilesWidth);
+				const unsigned int patch_y = unsigned int(patch_idx / textureTileWidth);
+				const unsigned int patch_x = unsigned int(patch_idx % textureTileWidth);
+				// extract texture tile	
+				const uint patchWidth = texPoolParams.m_texturePatchWidth + 2;
+				cv::Mat tex = textureMat(cv::Rect(
+					cv::Point(patch_x * patchWidth, patch_y * patchWidth),
+					cv::Point(patch_x * patchWidth + patchWidth, patch_y * patchWidth + patchWidth)
+				));
+				// add texture to global one
+				const vec2f patchCoords = vec2f(patch_x, patch_y);
+				const vec2f globalPatchCoords = addToGlobalTexture(patch_idx, tex);
+				md.m_TextureCoords[i] = (md.m_TextureCoords[i] + globalPatchCoords) / m_params.m_texGlobalWidth;
 				// mirror y axis in UV space
 				md.m_TextureCoords[i].y = 1 - md.m_TextureCoords[i].y;
 
 			}
+			// update block start idx for next run
+			blockPatchStartIdx = globalPatchIdx + 1;
+
 			printf("Texcoord indexing finish\n");
 
 			//create index buffer (required for merging the triangle soup)
@@ -201,28 +233,15 @@ void CUDAMarchingCubesHashSDF::copyTrianglesToCPU(TexPoolData texPoolData, TexPo
 				md.m_FaceIndicesVertices[i][2] = 3 * i + 2;
 			}
 			printf("Face index finish\n");
-
 			
-			uchar *h_textureImg = (uchar *)malloc(sizeof(uchar) * 3 * (texPoolParams.m_texturePatchWidth + 2) * (texPoolParams.m_texturePatchWidth + 2) * textureTileWidth * textureTileWidth);
-			
-			uchar *d_textureImg;
-			unsigned int *d_textureAddress;
-			cutilSafeCall(cudaMalloc(&d_textureImg, sizeof(uchar) * 3 * (texPoolParams.m_texturePatchWidth + 2) * (texPoolParams.m_texturePatchWidth + 2) * textureTileWidth * textureTileWidth));
-			cudaMemset(d_textureImg, 0, sizeof(uchar) * 3 * (texPoolParams.m_texturePatchWidth + 2) * (texPoolParams.m_texturePatchWidth + 2) * textureTileWidth * textureTileWidth);
-			cutilSafeCall(cudaMalloc(&d_textureAddress, sizeof(unsigned int) * textureTileWidth * textureTileWidth));
-			cudaMemset(d_textureAddress, 0, sizeof(unsigned int) * textureTileWidth * textureTileWidth);
+		
 
-			cudaMemcpy(d_textureAddress, uniqueTextureIndex.data(), sizeof(unsigned int) * h_numTextureTile, cudaMemcpyHostToDevice);
-			exportTexture(d_textureImg, d_textureAddress, texPoolData.d_texPatches, textureTileWidth, textureTileWidth, texPoolParams.m_texturePatchWidth, texPoolParams.m_texturePatchSize, h_numTextureTile, texPoolParams.m_numTexturePatches);
-			cudaMemcpy(h_textureImg, d_textureImg, sizeof(uchar) * 3 * (texPoolParams.m_texturePatchWidth + 2) * (texPoolParams.m_texturePatchWidth + 2) * textureTileWidth * textureTileWidth, cudaMemcpyDeviceToHost);
 
-			const uint texWidth = textureTileWidth * (texPoolParams.m_texturePatchWidth + 2);
-			cv::Mat textureMat(texWidth, texWidth, CV_8UC3, h_textureImg);
 			// copy texture tile to global Texture
-			textureMat.copyTo((*globalTexMap)(cv::Rect(
-				cv::Point(texTileWidthStart, texTileHeightStart),
-				cv::Point(texTileWidthStart + texWidth, texTileHeightStart + texWidth)
-			)));
+			//textureMat.copyTo((*globalTexMap)(cv::Rect(
+		    //		cv::Point(texTileWidthStart, texTileHeightStart),
+		    // 		cv::Point(texTileWidthStart + texWidth, texTileHeightStart + texWidth)
+			// )));
 
 			std::cout << "Done generating texture tile" << std::endl;
 			//md.mergeCloseVertices(0.001f, true);
@@ -245,6 +264,35 @@ void CUDAMarchingCubesHashSDF::copyTrianglesToCPU(TexPoolData texPoolData, TexPo
 	}
 
 	cpuData.free();
+}
+
+vec2f CUDAMarchingCubesHashSDF::addToGlobalTexture(const uint patchTexIdx, const cv::Mat& texPatch) {
+	const uint globalTexPatchIdx = blockPatchStartIdx + patchTexIdx;
+	const uint widthPatchPixels = m_params.m_texPoolPatchWidth + 2 * m_params.m_texPatchPadding;
+	const uint globalNumPatchesWidth = m_params.m_texGlobalWidth / widthPatchPixels;
+	const vec2i globalTexPatchCoordsPixels = vec2i(
+		widthPatchPixels * (globalTexPatchIdx % globalNumPatchesWidth),
+		widthPatchPixels * (globalTexPatchIdx / globalNumPatchesWidth)
+	);
+	globalPatchIdx = max(globalPatchIdx, globalTexPatchIdx);
+
+	vec2i bottomRightCoordsPixels = vec2i(widthPatchPixels, widthPatchPixels) + globalTexPatchCoordsPixels;
+	if (bottomRightCoordsPixels.x > m_params.m_texGlobalWidth || 
+		bottomRightCoordsPixels.y > m_params.m_texGlobalWidth) {
+		const std::string reason = "Global texture too small for " + std::to_string(globalPatchIdx) + " tiles. Increase s_texGlobalWidth to fix this error.";
+		throw MLIB_EXCEPTION(reason);
+	}
+
+	// copy texture tile to global texture if it's not already there
+	// auto foundIdx = std::find(blockLocalIdxs->begin(), blockLocalIdxs->end(), patchTexIdx);
+	// if (foundIdx != blockLocalIdxs->end()) {
+	texPatch.copyTo((*globalTexMap)(cv::Rect(
+		cv::Point(globalTexPatchCoordsPixels.x, globalTexPatchCoordsPixels.y),
+		cv::Point(bottomRightCoordsPixels.x, bottomRightCoordsPixels.y)
+	)));
+	// }
+	
+	return globalTexPatchCoordsPixels;
 }
 
 
@@ -369,15 +417,14 @@ void CUDAMarchingCubesHashSDF::extractIsoSurface(CUDASceneRepChunkGrid& chunkGri
 	}
 	
 	// padding around each individual texture patch (chosen minimally)
-	const uint texPadding = 1;
+	// const uint texPadding = 1;
 	// a patch corresponds to a single voxel (e.g. 8x8 px)
-	const uint texPatchWidth = texPoolParams.m_texturePatchWidth + 2 * texPadding;
+	// const uint texPatchWidth = texPoolParams.m_texturePatchWidth + 2 * texPadding;
 	// a tile correspondes to the set of patches corresponding to a single chunk
-	const uint texTileWidth = texPoolParams.m_numTextureTileWidth * texPatchWidth;
+	// const uint texTileWidth = texPoolParams.m_numTextureTileWidth * texPatchWidth;
 	// the map is the set of all texture patches next to each other
-	numGlobalTexTilesWidth = (uint)ceil(sqrt(chunks.size()));
-	globalTexMapWidth = numGlobalTexTilesWidth * (texTileWidth + texPadding);
-	globalTexMap = std::unique_ptr<cv::Mat>(new cv::Mat(globalTexMapWidth, globalTexMapWidth, CV_8UC3));
+	// numGlobalTexTilesWidth = (uint)ceil(sqrt(chunks.size()));
+	// globalTexMapWidth = numGlobalTexTilesWidth * (texTileWidth + texPadding);
 
 	for (int i = 0; i < chunks.size(); i++) {
 		vec3i chunk = chunks[i];
@@ -393,10 +440,8 @@ void CUDAMarchingCubesHashSDF::extractIsoSurface(CUDASceneRepChunkGrid& chunkGri
 		vec3f minCorner = chunkCenter - voxelExtends / 2.0f - vec3f(virtualVoxelSize, virtualVoxelSize, virtualVoxelSize)*(float)chunkGrid.getHashParams().m_SDFBlockSize;
 		vec3f maxCorner = chunkCenter + voxelExtends / 2.0f + vec3f(virtualVoxelSize, virtualVoxelSize, virtualVoxelSize)*(float)chunkGrid.getHashParams().m_SDFBlockSize;
 		
-		const uint texTileWidthStart = (i * (texTileWidth + texPadding)) % globalTexMapWidth;
-		const uint texTileHeightStart = (texTileWidth + texPadding) * ((i * (texTileWidth + texPadding)) / globalTexMapWidth);
 
-		extractIsoSurface(chunkGrid.getHashData(), chunkGrid.getHashParams(), rayCastData, texPoolData, texPoolParams, minCorner, maxCorner, true, texTileWidthStart, texTileHeightStart);
+		extractIsoSurface(chunkGrid.getHashData(), chunkGrid.getHashParams(), rayCastData, texPoolData, texPoolParams, minCorner, maxCorner, true);
 		chunkGrid.streamOutToCPUAll();
 	}
 
@@ -461,8 +506,7 @@ void CUDAMarchingCubesHashSDF::extractIsoSurface(CUDASceneRepChunkGrid& chunkGri
 }
 
 void CUDAMarchingCubesHashSDF::extractIsoSurface(const HashData& hashData, const HashParams& hashParams, const RayCastData& rayCastData, 
-	const TexPoolData& texPoolData, const TexPoolParams& texPoolParams, const vec3f& minCorner, const vec3f& maxCorner, bool boxEnabled, 
-	const uint texTileWidthStart, const uint texTileHeightStart)
+	const TexPoolData& texPoolData, const TexPoolParams& texPoolParams, const vec3f& minCorner, const vec3f& maxCorner, bool boxEnabled)
 {
 	resetMarchingCubesCUDA(m_data);
 
@@ -478,7 +522,7 @@ void CUDAMarchingCubesHashSDF::extractIsoSurface(const HashData& hashData, const
 	extractIsoSurfacePass2CUDA(hashData, rayCastData, m_params, m_data, texPoolData, m_data.getNumOccupiedBlocks());
 
 	std::cout << "Isosurface finish" << std::endl;
-	copyTrianglesToCPU(texPoolData, texPoolParams, texTileWidthStart, texTileHeightStart);
+	copyTrianglesToCPU(texPoolData, texPoolParams);
 }
 
 /*

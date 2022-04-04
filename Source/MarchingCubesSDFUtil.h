@@ -9,12 +9,17 @@
 extern  __constant__ TexPoolParams c_texPoolParams;
 extern "C" void updateConstantTexPoolParams(const TexPoolParams& texPoolParams);
 
+
 struct MarchingCubesParams {
 	bool m_boxEnabled;
 	float3 m_minCorner;
 
 	unsigned int m_maxNumTriangles;
 	float3 m_maxCorner;
+
+	unsigned int m_texGlobalWidth;
+	unsigned int m_texPoolPatchWidth;
+	unsigned int m_texPatchPadding;
 
 	unsigned int m_sdfBlockSize;
 	unsigned int m_hashNumBuckets;
