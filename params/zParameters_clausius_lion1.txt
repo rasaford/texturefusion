@@ -38,7 +38,7 @@ s_startFrame = 0;
 // Texture width
 s_texPoolPatchWidth = 8;
 // Final texture width, final size is (width, width) px (CPU allocated)
-s_texGlobalWidth = 4096;
+s_texGlobalWidth = 8500;
 s_texPatchPadding = 1;
 
 // The number of preallocated tiles in GPU
