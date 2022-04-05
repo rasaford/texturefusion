@@ -30,7 +30,7 @@ s_voxelRenderingEnabled  = false;
 s_texKeyFrames = 2;
 
 // used when we use record files
-s_nVideoFrame =2150; //650;
+s_nVideoFrame = 2150; //650;
 s_startFrame = 0;
 
 // Texture width
@@ -41,7 +41,7 @@ s_texGlobalWidth = 8500;
 s_texPatchPadding = 1;
 
 // The number of preallocated tiles in GPU
-s_texPoolNumPatches = 5000000;
+s_texPoolNumPatches = 8000000;
 s_numTextureTileWidth = 128;
 
 // About blending weights
@@ -84,7 +84,7 @@ s_colorCropWidth = 640;
 s_colorCropHeight = 480;
 
 
-s_SDFVoxelSize = 0.006;				//voxel size in meter
+s_SDFVoxelSize = 0.007;				//voxel size in meter
 s_SDFMarchingCubeThreshFactor = 10.0f;	//marching cube thresh: s_SDFMarchingCubeThresh = s_SDFMarchingCubeThreshFactor*s_SDFVoxelSize
 s_SDFTruncation = 0.02f;				//truncation in meter (5.0f*s_SDFVoxelSize )
 s_SDFTruncationScale = 0.01f;			//truncation scale in meter per meter (2.5f*s_SDFVoxelSize )
@@ -95,7 +95,7 @@ s_SDFIntegrationWeightMax = 255;		//maximum integration weight for a voxel
 // s_SDFBlockSize is pound defined (SDF_BLOCK_SIZE)
 // s_hashBucketSize is pound defined (HASH_BUCKET_SIZE)
 s_hashNumBuckets = 200000; //50000;				//smaller voxels require more space
-s_hashNumSDFBlocks = 600000;			//smaller voxels require more space
+s_hashNumSDFBlocks = 500000;			//smaller voxels require more space
 s_hashMaxCollisionLinkedListSize = 5;
 
 // raycast

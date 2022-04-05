@@ -2,7 +2,7 @@
 s_sensorIdx = 9;
 
 //fountail
-s_sceneName = "rsl_lab4";
+s_sceneName = "rsl_lab6";
 //s_binaryDumpSensorFile[0] = "data/fountain_all";
 s_binaryDumpSensorFile[0] = "D:\realsense_depth_color_img\extracted\rsl_lab6";
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
