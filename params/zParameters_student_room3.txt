@@ -2,9 +2,9 @@
 s_sensorIdx = 9;
 
 //fountail
-s_sceneName = "student_room6";
+s_sceneName = "student_room3";
 //s_binaryDumpSensorFile[0] = "data/fountain_all";
-s_binaryDumpSensorFile[0] = "D:\realsense_depth_color_img\extracted\student_room6";
+s_binaryDumpSensorFile[0] = "D:\realsense_depth_color_img\extracted\student_room3";
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // parameters for our implementation
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -31,7 +31,7 @@ s_voxelRenderingEnabled  = false;
 s_texKeyFrames = 2;
 
 // used when we use record files
-s_nVideoFrame = 1000;//2800; //650;
+s_nVideoFrame = 100;//2800; //650;
 //s_nVideoFrame = 0;
 s_startFrame = 0;
 
@@ -97,7 +97,7 @@ s_SDFIntegrationWeightMax = 255;		//maximum integration weight for a voxel
 // s_SDFBlockSize is pound defined (SDF_BLOCK_SIZE)
 // s_hashBucketSize is pound defined (HASH_BUCKET_SIZE)
 s_hashNumBuckets = 800000; //50000;				//smaller voxels require more space
-s_hashNumSDFBlocks = 450000;			//smaller voxels require more space
+s_hashNumSDFBlocks = 500000;			//smaller voxels require more space
 s_hashMaxCollisionLinkedListSize = 5;
 
 // raycast

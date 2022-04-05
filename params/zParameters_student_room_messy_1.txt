@@ -2,9 +2,9 @@
 s_sensorIdx = 9;
 
 //fountail
-s_sceneName = "student_room6";
+s_sceneName = "student_room_messy_1";
 //s_binaryDumpSensorFile[0] = "data/fountain_all";
-s_binaryDumpSensorFile[0] = "D:\realsense_depth_color_img\extracted\student_room6";
+s_binaryDumpSensorFile[0] = "D:\realsense_depth_color_img\extracted\student_room_messy_1";
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // parameters for our implementation
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -14,7 +14,6 @@ s_binaryDumpSensorFile[0] = "D:\realsense_depth_color_img\extracted\student_room
 // 1 = Rigid warp
 // 2 = None
 s_optimizationIdx = 0;
-IFSDFSDFSDFSDFS
 //exposure
 s_gain = 1;
 s_exposure = 200;
@@ -31,9 +30,8 @@ s_voxelRenderingEnabled  = false;
 s_texKeyFrames = 2;
 
 // used when we use record files
-s_nVideoFrame = 1000;//2800; //650;
-//s_nVideoFrame = 0;
-s_startFrame = 0;
+s_nVideoFrame = 4300; //650;
+s_startFrame = 200;
 
 // Texture width
 s_texPoolPatchWidth = 4;
@@ -43,7 +41,7 @@ s_texGlobalWidth = 8500;
 s_texPatchPadding = 1;
 
 // The number of preallocated tiles in GPU
-s_texPoolNumPatches = 8000000;
+s_texPoolNumPatches = 18000000;
 s_numTextureTileWidth = 128;
 
 // About blending weights
@@ -86,7 +84,7 @@ s_colorCropWidth = 640;
 s_colorCropHeight = 480;
 
 
-s_SDFVoxelSize = 0.005;				//voxel size in meter
+s_SDFVoxelSize = 0.01;				//voxel size in meter
 s_SDFMarchingCubeThreshFactor = 10.0f;	//marching cube thresh: s_SDFMarchingCubeThresh = s_SDFMarchingCubeThreshFactor*s_SDFVoxelSize
 s_SDFTruncation = 0.02f;				//truncation in meter (5.0f*s_SDFVoxelSize )
 s_SDFTruncationScale = 0.01f;			//truncation scale in meter per meter (2.5f*s_SDFVoxelSize )
@@ -96,8 +94,8 @@ s_SDFIntegrationWeightMax = 255;		//maximum integration weight for a voxel
 
 // s_SDFBlockSize is pound defined (SDF_BLOCK_SIZE)
 // s_hashBucketSize is pound defined (HASH_BUCKET_SIZE)
-s_hashNumBuckets = 800000; //50000;				//smaller voxels require more space
-s_hashNumSDFBlocks = 450000;			//smaller voxels require more space
+s_hashNumBuckets = 200000; //50000;				//smaller voxels require more space
+s_hashNumSDFBlocks = 400000;			//smaller voxels require more space
 s_hashMaxCollisionLinkedListSize = 5;
 
 // raycast
@@ -156,7 +154,7 @@ s_streamingMinGridPos = -256 -256 -256;
 s_streamingInitialChunkListSize = 2000;
 s_streamingRadius = 4.0f; // Depends on DepthMin and DepthMax			WARNING: PARAMETER NOT USED; ARE COMPUTED AUTOMATICALLY
 s_streamingPos = 0.0f 0.0f 3.0f; // Depends on DepthMin and DepthMax	WARNING: PARAMETER NOT USED; ARE COMPUTED AUTOMATICALLY
-s_streamingOutParts = 80;	// number of frames required to sweep through the entire hash
+s_streamingOutParts = 100;	// number of frames required to sweep through the entire hash
 
 //recording of the input data
 s_recordData = false;			// master flag for data recording: enables or disables data recording

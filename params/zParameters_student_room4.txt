@@ -31,19 +31,19 @@ s_voxelRenderingEnabled  = false;
 s_texKeyFrames = 2;
 
 // used when we use record files
-s_nVideoFrame = 2800; //650;
+s_nVideoFrame = 2500; //650;
 //s_nVideoFrame = 0;
-s_startFrame = 0;
+s_startFrame = 300;
 
 // Texture width
-s_texPoolPatchWidth = 8;
+s_texPoolPatchWidth = 4;
 // Final texture width, final size is (width, width) px (CPU allocated)
 s_texGlobalWidth = 8500;
 // DO NOT CHANGE THIS PARAMETER
 s_texPatchPadding = 1;
 
 // The number of preallocated tiles in GPU
-s_texPoolNumPatches = 8000000;
+s_texPoolNumPatches = 15000000;
 s_numTextureTileWidth = 128;
 
 // About blending weights
@@ -86,7 +86,7 @@ s_colorCropWidth = 640;
 s_colorCropHeight = 480;
 
 
-s_SDFVoxelSize = 0.01;				//voxel size in meter
+s_SDFVoxelSize = 0.0075;				//voxel size in meter
 s_SDFMarchingCubeThreshFactor = 10.0f;	//marching cube thresh: s_SDFMarchingCubeThresh = s_SDFMarchingCubeThreshFactor*s_SDFVoxelSize
 s_SDFTruncation = 0.02f;				//truncation in meter (5.0f*s_SDFVoxelSize )
 s_SDFTruncationScale = 0.01f;			//truncation scale in meter per meter (2.5f*s_SDFVoxelSize )
@@ -96,8 +96,8 @@ s_SDFIntegrationWeightMax = 255;		//maximum integration weight for a voxel
 
 // s_SDFBlockSize is pound defined (SDF_BLOCK_SIZE)
 // s_hashBucketSize is pound defined (HASH_BUCKET_SIZE)
-s_hashNumBuckets = 800000; //50000;				//smaller voxels require more space
-s_hashNumSDFBlocks = 150000;			//smaller voxels require more space
+s_hashNumBuckets = 400000; //50000;				//smaller voxels require more space
+s_hashNumSDFBlocks = 400000;			//smaller voxels require more space
 s_hashMaxCollisionLinkedListSize = 5;
 
 // raycast
@@ -156,7 +156,7 @@ s_streamingMinGridPos = -256 -256 -256;
 s_streamingInitialChunkListSize = 2000;
 s_streamingRadius = 4.0f; // Depends on DepthMin and DepthMax			WARNING: PARAMETER NOT USED; ARE COMPUTED AUTOMATICALLY
 s_streamingPos = 0.0f 0.0f 3.0f; // Depends on DepthMin and DepthMax	WARNING: PARAMETER NOT USED; ARE COMPUTED AUTOMATICALLY
-s_streamingOutParts = 80;	// number of frames required to sweep through the entire hash
+s_streamingOutParts = 100;	// number of frames required to sweep through the entire hash
 
 //recording of the input data
 s_recordData = false;			// master flag for data recording: enables or disables data recording
