@@ -290,7 +290,9 @@ unsigned int CUDASceneRepChunkGrid::integrateInHash( const vec3f& posCamera, flo
 					{
 						unsigned int nBlock = m_grid[index]->getNElements();
 						if (nBlock + nSDFBlocks > m_maxNumberOfSDFBlocksIntegrateFromGlobalHash) {
-							throw MLIB_EXCEPTION("not enough memory allocated for intermediate GPU buffer (wants to stream out more block than m_maxNumberOfSDFBlocksIntegrateFromGlobalHash)");
+							throw MLIB_EXCEPTION("not enough memory allocated for intermediate GPU buffer (wants to stream out more block than m_maxNumberOfSDFBlocksIntegrateFromGlobalHash), wants:" +
+								std::to_string(nBlock + nSDFBlocks) + ", allocated: " + std::to_string(m_maxNumberOfSDFBlocksIntegrateFromGlobalHash)
+						);
 						}
 						// Copy data to GPU
 						MLIB_CUDA_SAFE_CALL(cudaMemcpy(d_SDFBlockDescInput + nSDFBlocks, &(m_grid[index]->getSDFBlockDescs()[0]), sizeof(SDFBlockDesc)*nBlock, cudaMemcpyHostToDevice));
