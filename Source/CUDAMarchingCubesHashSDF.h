@@ -36,7 +36,10 @@ public:
 	void reset(void) {
 		m_meshData.clear();
 		m_meshOnlyData.clear();
-		globalTexMap->setTo(cv::Scalar(0, 0, 0));
+		patches.clear();
+		topLefts.clear();
+		globalPatchIdx = 0;
+		blockPatchStartIdx = 0;
 	}
 
 	//! copies the intermediate result of extract isoSurfaceCUDA to the CPU and merges it with meshData
@@ -65,12 +68,12 @@ private:
 	// Adds a texture patch in local coordinates to the global texture
 	// @returns global (u, v) texture coordinates
 	vec2f addToGlobalTexture(const uint patchTexIdx, const cv::Mat &texPatch);
+	std::unique_ptr<cv::Mat> getGlobalTexMap();
 
-	std::unique_ptr<cv::Mat> globalTexMap;
-	vec2i freeTexPatchCoords;
 	uint globalPatchIdx;
 	uint blockPatchStartIdx;
-	std::unique_ptr<std::vector<uint>> blockLocalIdxs;
+	std::vector<std::unique_ptr<cv::Mat>> patches;
+	std::vector<std::unique_ptr<vec2i>> topLefts;
 	// uint globalTexMapWidth;
 	// uint numGlobalTexTilesWidth;
 

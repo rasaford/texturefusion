@@ -2,7 +2,7 @@
 s_sensorIdx = 9;
 
 //fountail
-s_sceneName = "fountain";
+s_sceneName = "firehose";
 //s_binaryDumpSensorFile[0] = "data/fountain_all";
 s_binaryDumpSensorFile[0] = "D:\realsense_depth_color_img\extracted\firehose";
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -31,7 +31,7 @@ s_voxelRenderingEnabled  = false;
 s_texKeyFrames = 2;
 
 // used when we use record files
-s_nVideoFrame = 864; //650;
+s_nVideoFrame = 100;//864; //650;
 //s_nVideoFrame = 0;
 s_startFrame = 0;
 

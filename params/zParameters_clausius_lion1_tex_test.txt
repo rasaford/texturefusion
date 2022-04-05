@@ -31,14 +31,13 @@ s_voxelRenderingEnabled  = false;
 s_texKeyFrames = 2;
 
 // used when we use record files
-s_nVideoFrame = 300;
+s_nVideoFrame = 1415;
 //s_nVideoFrame = 0;
-s_startFrame = 500;
+s_startFrame = 0;
 
 // Texture width
 s_texPoolPatchWidth = 8;
-// Final texture width, final size is (width, width) px (CPU allocated)
-s_texGlobalWidth = 8500;
+s_texGlobalWidth = 6000;
 // DO NOT CHANGE THIS PARAMETER
 s_texPatchPadding = 1;
 

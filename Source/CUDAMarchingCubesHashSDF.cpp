@@ -28,10 +28,6 @@ void CUDAMarchingCubesHashSDF::create(const MarchingCubesParams& params)
 	m_params = params;
 	m_data.allocate(m_params);
 
-	// global tex map stuff
-	globalTexMap = std::unique_ptr<cv::Mat>(new cv::Mat(m_params.m_texGlobalWidth, m_params.m_texGlobalWidth, CV_8UC3));
-	blockLocalIdxs = std::unique_ptr<std::vector<uint>>(new std::vector<uint>());
-	freeTexPatchCoords = vec2i(0, 0);
 	globalPatchIdx = 0;
 	blockPatchStartIdx = 0;
 
@@ -276,23 +272,33 @@ vec2f CUDAMarchingCubesHashSDF::addToGlobalTexture(const uint patchTexIdx, const
 	);
 	globalPatchIdx = max(globalPatchIdx, globalTexPatchIdx);
 
-	vec2i bottomRightCoordsPixels = vec2i(widthPatchPixels, widthPatchPixels) + globalTexPatchCoordsPixels;
-	if (bottomRightCoordsPixels.x > m_params.m_texGlobalWidth || 
-		bottomRightCoordsPixels.y > m_params.m_texGlobalWidth) {
-		const std::string reason = "Global texture too small for " + std::to_string(globalPatchIdx) + " tiles. Increase s_texGlobalWidth to fix this error.";
-		throw MLIB_EXCEPTION(reason);
-	}
-
-	// copy texture tile to global texture if it's not already there
-	// auto foundIdx = std::find(blockLocalIdxs->begin(), blockLocalIdxs->end(), patchTexIdx);
-	// if (foundIdx != blockLocalIdxs->end()) {
-	texPatch.copyTo((*globalTexMap)(cv::Rect(
-		cv::Point(globalTexPatchCoordsPixels.x, globalTexPatchCoordsPixels.y),
-		cv::Point(bottomRightCoordsPixels.x, bottomRightCoordsPixels.y)
-	)));
-	// }
+	std::unique_ptr<cv::Mat> patch = std::make_unique<cv::Mat>(
+		m_params.m_texPoolPatchWidth, m_params.m_texPoolPatchWidth, CV_8UC3);
+	texPatch.copyTo(*patch);
+	patches.push_back(std::move(patch));
+	topLefts.push_back(std::make_unique<vec2i>(globalTexPatchCoordsPixels.x, globalTexPatchCoordsPixels.y));
 	
 	return globalTexPatchCoordsPixels;
+}
+
+std::unique_ptr<cv::Mat> CUDAMarchingCubesHashSDF::getGlobalTexMap() {
+	const uint widthPatchPixels = m_params.m_texPoolPatchWidth + 2 * m_params.m_texPatchPadding;
+	const uint globalNumPatchesWidth = m_params.m_texGlobalWidth / widthPatchPixels;
+	// integer ceil
+	const uint globalTexHeight = widthPatchPixels * ((globalPatchIdx + globalNumPatchesWidth - 1) / globalNumPatchesWidth);
+	std::unique_ptr<cv::Mat> globalTexMap = std::make_unique<cv::Mat>(globalTexHeight, m_params.m_texGlobalWidth, CV_8UC3);
+	std::cout << "Creating texture map of " << globalTexHeight<< " x " << m_params.m_texGlobalWidth << std::endl;
+
+	for (size_t i = 0; i < patches.size(); i++) {
+		vec2i topLeft = *topLefts[i];
+		cv::Mat patch = *patches[i];
+		vec2i bottomRight = topLeft + vec2i(widthPatchPixels, widthPatchPixels);
+		patch.copyTo((*globalTexMap)(cv::Rect(
+			cv::Point(topLeft.x, topLeft.y),
+			cv::Point(bottomRight.x, bottomRight.y)
+		)));
+	}
+	return std::move(globalTexMap);
 }
 
 
@@ -492,7 +498,7 @@ void CUDAMarchingCubesHashSDF::extractIsoSurface(CUDASceneRepChunkGrid& chunkGri
 		<< "\tmap_Kd " << textureFileName;
 	mtlout.close();
 	
-
+	std::unique_ptr<cv::Mat> globalTexMap = getGlobalTexMap();
 	cv::cvtColor(*globalTexMap, *globalTexMap, cv::COLOR_RGB2BGR);
 	cv::imwrite(folderTextureFileName, *globalTexMap);
 
