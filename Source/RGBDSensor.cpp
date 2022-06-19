@@ -400,16 +400,17 @@ void RGBDSensor::saveRecordedFramesToFile( const std::string& filename )
 				dFrame++;
 				continue;
 			}
-			if (dFrame % 20 == 19) {
+			//if (dFrame % 20 == 19) {
 				warp_mat = (a * previous_mat.getInverse()).getInverse();
-				out << keyFrame << " " << keyFrame << " " << keyFrame + 1 << "\n";
-				out << a.at(0, 0) << " " << a.at(0, 1) << " " << a.at(0, 2) << " " << a.at(0, 3) << "\n";
-				out << a.at(1, 0) << " " << a.at(1, 1) << " " << a.at(1, 2) << " " << a.at(1, 3) << "\n";
-				out << a.at(2, 0) << " " << a.at(2, 1) << " " << a.at(2, 2) << " " << a.at(2, 3) << "\n";
+				out << "Frame: " << dFrame << " keyFrame: " << keyFrame << " nextKeyFrame: " << keyFrame + 1 << "\n";
+				out << "T: ";
+				out << a.at(0, 0) << " " << a.at(0, 1) << " " << a.at(0, 2) << " " << a.at(0, 3) << " ";
+				out << a.at(1, 0) << " " << a.at(1, 1) << " " << a.at(1, 2) << " " << a.at(1, 3) << " ";
+				out << a.at(2, 0) << " " << a.at(2, 1) << " " << a.at(2, 2) << " " << a.at(2, 3) << " ";
 				out << a.at(3, 0) << " " << a.at(3, 1) << " " << a.at(3, 2) << " " << a.at(3, 3) << "\n";
 				previous_mat = a;
 				keyFrame++;
-			}
+			//}
 			dFrame++;
 		}
 		

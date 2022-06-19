@@ -154,9 +154,9 @@ s_streamingPos = 0.0f 0.0f 3.0f; // Depends on DepthMin and DepthMax	WARNING: PA
 s_streamingOutParts = 80;	// number of frames required to sweep through the entire hash
 
 //recording of the input data
-s_recordData = false;			// master flag for data recording: enables or disables data recording
+s_recordData = true;			// master flag for data recording: enables or disables data recording
 s_recordCompression = true;		//if recoding is enabled; then compression is used (.sens instead of .sensor)
-s_recordDataFile = "Dump/test.sens";
+s_recordDataFile = "C:\Users\max\Downloads\realsense_depth_color\slow.sens";
 s_reconstructionEnabled = true;
 
 s_offlineProcessing = true;			//slower, but makes sure that all voxels are alllocated and streaming all blocks is enforced
